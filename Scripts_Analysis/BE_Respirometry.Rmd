@@ -1,0 +1,234 @@
+---
+title: "Respirometry BE"
+editor_options: null
+  chunk_output_type: console
+output:
+  html_document:
+    df_print: paged
+chunk_output_type: console
+---
+### Goal: Rear UZ and BE at 23C at 16:8 and 12:12 L:D regimens (UZ12, UZ16, BE12, BE16). Track CO2 production as a function of number of days after molting into the 5th instar. Track average weight gain as a function of number of days after molting into the 5th instar. Compare CO2 production and weight gain within strain and between L:D then compare L:D between strains 
+
+#Libraries and Reading in Data
+````{r}
+#############--------------Read in the data-----------------######################
+#PC
+setwd("/Users/jbrown/Documents/GitHub/Respirometry/Data/")
+data=read_excel("Respir.xlsx")
+##Remove rows with NA
+data=subset(data, VCO2!="NA")
+
+#MAC
+#data=read_excel("/Users/JamesB/Google Drive/Graduate School/Self_JamesTBrown/GitHub/Respirometry/Data/Respir.xlsx", sheet = "Sheet1")
+##Remove rows with NA
+data=subset(data, VCO2!="NA")
+
+#############--------------Preping Data-----------------######################
+#Removing "Blank Control" syringes
+data=subset(data,data$syringe!="Blank Control")
+##Set "syringe" identifier as a character
+data$syringe=as.character(data$syringe)
+##Set "treat" (read:treatment) as a factor (read:independent variable)
+data$treat=as.factor(data$treat)
+##This code breaks apart the data in the column "treat" into "strain" and "photoperiod"
+data$strain<-as.factor(data$strain)
+data$treat<-as.factor(data$treat)
+str(data)
+
+
+
+#############--------df for Larvae Plots and Data Analysis---------#############
+dataBE=data
+dataBE=subset(dataBE, strain=="BE")
+dataBE=subset(dataBE, stage=="L")
+dataBE=subset(dataBE, treat=="1" | treat=="2")
+dataBE=subset(dataBE, Tray=="12,23 1201-01"|Tray=="12,23 1201-02"|Tray=="16,23 1202"|Tray=="16,23 1201")
+par(mfrow=c(1,1))
+
+#############------df for Larvae Freq Plots and Data Analysis-------#############
+dataFREQm=data
+dataFREQm=subset(dataFREQm,strain!="UZ")
+dataFREQm=subset(dataFREQm,stage=="L")
+dataFREQm=subset(dataFREQm,treat=="1" | treat=="2")
+dataFREQm=subset(dataFREQm, Tray=="12,23 1201-01"|Tray=="12,23 1201-02"|Tray=="16,23 1202"|Tray=="16,23 1201")
+
+
+#############------df for Pupae Freq Plots and Data Analysis-------#############
+dataFREQp=data
+dataFREQp=subset(dataFREQp, strain=="BE")
+dataFREQp=subset(dataFREQp, stage=="P" & treat=="1" | treat=="2")
+
+#############------df 1st 10 days Plots and Data Analysis-------#############
+data1to10=dataBE
+data1to10=subset(data1to10, day==1 | day==2 | day==3 | day==4 | day==5 | day==6 | day==7 | day==8 | day==9 | day==10)
+mod=aov(data1to10$co2_hourly_mass~data1to10$treat)
+data1to10$stdresd<-as.vector(scale(resid(mod)))
+`````
+
+#Plots of CO2 production over time df: dataBE
+`````{r}
+#INDIVIDUAL POINT PLOTS: Hourly CO2 production
+ggplot(data=dataBE,aes(x=day,y=co2_hourly))+
+  geom_point()+geom_line()+
+  ggtitle("BE Larvae CO2 production")+
+  ylab("CO2 production")+
+  facet_wrap(~syringe)+
+  scale_x_continuous(breaks = c(5,15,30,45,60))+
+  scale_y_continuous(limits=c(0,8))
+
+#INDIVIDUAL POINT PLOTS: Hourly CO2 production by mass
+ggplot(data=dataBE,aes(x=day,y=co2_hourly_mass))+
+  geom_point()+geom_line()+
+  ggtitle("BE Strain weighted by Mass")+
+  ylab("CO2 production by mass")+
+  facet_wrap(~syringe)+
+  scale_x_continuous(breaks = c(5,15,30,45,60))+
+  scale_y_continuous(limits=c(0,100))
+
+##BOXPLOT: Hourly CO2 production
+ggplot(data=dataBE,aes(x=treat,y=co2_hourly, color=treat))+
+  geom_boxplot()+stat_smooth(method="loess")+
+  theme_classic()+
+  ggtitle("BE Larvae CO2 production")+
+  ylab("CO2 production")
+
+##BOXPLOT: Hourly CO2 production by mass
+ggplot(data=dataBE,aes(x=treat,y=co2_hourly_mass, color=treat))+
+  geom_boxplot()+stat_smooth(method="loess")+
+  theme_classic()+
+  ggtitle("BE Larvae CO2 production by Mass")+
+  ylab("CO2 production by mass")
+`````
+
+##Larvae and Pupae freqs df: dataFREQm, dataFREQp
+```{r}
+str(dataFREQm)
+dataFREQm=subset(dataFREQm, treat=="2")
+#Larva MASS: Chaqnge Over Time
+ggplot(data=dataFREQm,aes(x=day,y=mass))+
+  geom_line(aes(group=syringe))+
+  theme_classic()+
+  ggtitle("BE Larvae Mass Increase")+
+  ylab("Mass")+xlab("Day")+
+  scale_colour_discrete(name="Treatment",breaks=c("1", "2"),labels=c("Diapause", "Non-Diapause"))+
+  scale_x_continuous(breaks = c(0,1,2,3,4,5,6,7,8,9,10,11,12,13))+
+  scale_y_continuous(limits=c(0,0.15))
+
+ggplot(data=dataFREQm,aes(x=co2_hourly,y=mass))+
+  geom_point()+stat_smooth(method="lm")+
+  theme_classic()+
+  ggtitle("BE Larvae Mass Increase")+
+  ylab("Mass")+xlab("CO2 Production")+
+  scale_colour_discrete(name="Treatment",breaks=c("1", "2"),labels=c("Diapause", "Non-Diapause"))+
+  scale_x_continuous(breaks = c(0,1,2,3,4,5,6,7,8,9,10))+
+  scale_y_continuous(limits=c(0,0.20))
+
+#Larva: Distribution between conditions
+ggplot(dataFREQp, aes(day, fill = treat))+
+  theme_classic()+
+  geom_bar()+
+  labs(title = "Number of Larvae across time", x = "Day", y = "Number of Individuals")+
+  scale_x_continuous(breaks = c(0,1,5,10,20,40,60))+
+  scale_y_continuous()
+
+#PUPA: Distribution between conditions
+ggplot(dataFREQp, aes(day, fill = treat))+
+  theme_classic()+
+  geom_bar()+
+  labs(title = "Number of Pupae across time", x = "Day", y = "Number of Individuals")+
+  scale_x_continuous(breaks = c(0,1,5,10,20,40,60))+
+  scale_y_continuous()
+
+#PUPA: Distribution across time
+ggplot(dataFREQp, aes(day, fill = stage))+
+  theme_classic()+
+  geom_bar()+
+  labs(title = "Larvae stage across time", x = "Day", y = "Number of Individuals")+
+  scale_x_continuous(breaks = c(0,1,5,10,20,40,60))+
+  scale_y_continuous()
+```
+
+##Plotting CO2 for the 1st 5 days df: data=dataa
+````{r}
+##Plotting CO2 production for the first 10 days 
+ggplot(data1to10,aes(x=day,y=co2_hourly_mass,fill=treat))+
+  geom_point()+
+  geom_smooth(method="lm")+
+  labs(title="Day 1 thru 10 UZ Larvae",x ="Day", y = "Hourly CO2 Production by Mass")+
+  scale_colour_discrete(name="Treatment",breaks=c("1","2"),labels=c("Diapause","Non-Diapause"))
+
+ggplot(data1to5,aes(x=factor(day),y=stdresd))+
+  geom_boxplot(aes(fill=treat))+
+  scale_fill_discrete("",breaks=c("1","2"), labels=c("Diapause", "Non Diapause"))+
+  labs(title="Day 1 thru 5 UZ Larvae",x ="Day", y = "Hourly CO2 Production by Mass")
+
+##Mass Accumulation
+ggplot(data1to5,aes(x=day,y=mass,color=treat))+
+  geom_point()+
+  geom_smooth(method="lm")+
+  labs(title="Day 1 thru 5 UZ Larvae Mass Increase",x ="Day", y = "Mass")+
+  scale_colour_discrete(name="Treatment", breaks=c("1", "2"),labels=c("Diapause", "Non-Diapause"))
+````
+
+##Data Analysis
+````{r}
+## Significance of photoperiod and/or day to explain hourly CO2 production 
+mod=aov(dataBE$co2_hourly ~ dataBE$treat*dataBE$day)
+summary(mod)
+par(mfrow=c(2,2))
+plot(mod, main="BE Larvae")
+
+## Significance of photoperiod and/or day to explain hourly CO2 production weighted by mass
+mod1=aov(dataBE$co2_hourly_mass ~ dataBE$treat*dataBE$day)
+summary(mod1)
+par(mfrow=c(2,2))
+plot(mod1, main="BE Larvae by Mass")
+
+###########################Graph of Data###################################
+##Line plot of each syringe CO2 production averages by treatment
+gd=data1to10 %>% group_by(treat, day) %>% summarise(co2_hourly_mass = mean(co2_hourly_mass))
+
+ggplot(day1to10,aes(x=day,y=co2_hourly_mass, color=treat))+
+  theme_minimal()+
+  geom_line(aes(group=syringe),alpha=0.3)+
+  geom_line(data=gd, alpha=0.8,size=3)+
+  labs(title ="Rep 1: BE larvae",x = "Day",y = "CO2 Production by Mass")+
+  scale_colour_discrete(name="Treatment",breaks=c("1", "2"), labels=c("Diapause", "Non-Diapause"))
+
+day1=subset(day1to10,day=="1")
+mod1=lmer(co2_hourly_mass~treat*day+(day|syringe),data=day1)
+summary(mod1)
+
+day2=subset(day1to10, day<3)
+mod2=lmer(co2_hourly_mass~treat*day+(day|syringe),data=day2)
+summary(mod2)
+
+day3=subset(day1to10, day<4)
+mod3=lmer(co2_hourly_mass~treat*day+(1|syringe),data=day3)
+summary(mod3)
+
+day4=subset(day1to10, day<5)
+mod4=lmer(co2_hourly_mass~treat*day+(1|syringe),data=day4)
+summary(mod4)
+
+day6=subset(day1to10, day<7)
+mod6=lmer(co2_hourly_mass~treat*day+(1|syringe),data=day6)
+summary(mod6)
+
+day7=subset(day1to10, day<8)
+mod7=lmer(co2_hourly_mass~treat*day+(1|syringe),data=day7)
+summary(mod7)
+
+day8=subset(day1to10, day<9)
+mod8=lmer(co2_hourly_mass~treat*day+(1|syringe),data=day8)
+summary(mod8)
+
+day9=subset(day1to10, day<7)
+mod9=lmer(co2_hourly_mass~treat*day+(1|syringe),data=day9)
+summary(mod9)
+
+day10=subset(day1to10, day<10)
+mod10=lmer(co2_hourly_mass~treat*day+(day|syringe),data=day10)
+summary(mod10)
+plot(mod10)
+````

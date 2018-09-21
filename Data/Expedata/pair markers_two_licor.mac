@@ -1,0 +1,55 @@
+[macro 1]
+active channel 1
+make_temp_data_copy all_samples
+correction drift all_samples minimum pivot left_right  copy_only left_percent 1 right_percent 1 subset_percent 10
+overwrite_data_with_copy all_samples
+create channel
+assign title 6 = VCO2
+assign title 6 = VCO2
+active channel 6
+transform general all_samples expression (VCO2)*FR/1000000
+' Transform="(C6)*C2/1000000"
+select between_markers all_samples marker1 N(33) marker2 N(33)
+select selectedwindow selected
+getstats integrate timebase seconds baseline zero
+writestats StartTime to spreadsheet
+writestats Area to spreadsheet
+writestats newline to spreadsheet
+for more marker_pairs N(33) N(33)
+select between_markers next marker1 N(33) marker2 N(33)
+select selectedwindow selected
+getstats integrate timebase seconds baseline zero
+writestats StartTime to spreadsheet
+writestats Area to spreadsheet
+writestats newline to spreadsheet
+next marker_pair
+ endif
+
+
+active channel 3
+make_temp_data_copy all_samples
+correction drift all_samples minimum pivot left_right  copy_only left_percent 1 right_percent 1 subset_percent 10
+overwrite_data_with_copy all_samples
+create channel
+assign title 7 = VCO2_6262
+assign title 7 = VCO2_6262
+active channel 7
+transform general all_samples expression (VCO2_6262)*FR/1000000
+' Transform="(C7)*C2/1000000"
+select between_markers all_samples marker1 N(33) marker2 N(33)
+select selectedwindow selected
+getstats integrate timebase seconds baseline zero
+writestats StartTime to spreadsheet
+writestats Area to spreadsheet
+writestats newline to spreadsheet
+for more marker_pairs N(33) N(33)
+select between_markers next marker1 N(33) marker2 N(33)
+select selectedwindow selected
+getstats integrate timebase seconds baseline zero
+writestats StartTime to spreadsheet
+writestats Area to spreadsheet
+writestats newline to spreadsheet
+next marker_pair
+ endif
+
+[/macro 1]

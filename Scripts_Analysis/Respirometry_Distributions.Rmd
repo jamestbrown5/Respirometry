@@ -1,0 +1,298 @@
+---
+title: "Respirometry"
+editor_options: null
+chunk_output_type: inline
+output: html_document
+df_print: paged
+---
+### Goal: Rear UZ and BE at 23C at 16:8 and 12:12 L:D regimens (UZ12, UZ16, BE12, BE16). Track CO2 production as a function of number of days after molting into the 5th instar. Track average weight gain as a function of number of days after molting into the 5th instar. Compare CO2 production and weight gain within strain and between L:D then compare L:D between strains 
+
+##Call Data
+````{r}
+library(splines)
+library(stats)
+library(readxl)
+library(ggplot2)
+library(nlme)
+library(lme4)
+library(lmerTest)
+library(ez)
+library(lsr)
+library(dplyr)
+library(tidyr)
+library(MASS)
+library(doBy)
+library(plyr)
+#############--------------Read in the data-----------------######################
+#PC
+setwd("/Users/jbrown/Documents/GitHub/Respirometry/Data/")
+data=read_excel("Respir.xlsx")
+
+
+#MAC
+#data=read_excel("/Users/JamesB/Google Drive/Graduate School/Self_JamesTBrown/GitHub/Respirometry/Data/Respir.xlsx", sheet = "Sheet1")
+
+
+##Remove rows with NA
+data=subset(data, VCO2!="NA")
+data=subset(data, syringe!="Blank Control")
+str(data)
+````
+
+##Data Prep
+````{r}
+#######################################
+##########Subsetting Data##############
+#######################################
+data=subset(data,data$syringe!="Blank Control") #Removing "Blank Control" syringes
+data$syringe=as.character(data$syringe) #Set "syringe" identifier as a character
+data$strain<-as.factor(data$strain) #set strain as ind var
+data$treat<-as.factor(data$treat) #set treat as factor as ind var
+str(data)
+
+##########################################
+#df BE Rep1 Stages Plots and Data Analysis
+##########################################
+dataBEr1s=data
+dataBEr1s=subset(dataBEr1s, treat=="1" | treat=="2")
+dataBEr1s=subset(dataBEr1s, Tray=="12,23 1201-01"|Tray=="12,23 1201-02"|Tray=="16,23 1202"|Tray=="16,23 1201")
+
+##########################################
+#df BE Rep2 Stages Plots and Data Analysis
+##########################################
+dataBEr2s=data
+dataBEr2s=subset(dataBEr2s, treat=="1" | treat=="2")
+dataBEr2s=subset(dataBEr2s, Tray=="16,23 0206" | Tray=="12,23 0208")
+
+##########################################
+#df UZ Rep1 Stages Plots and Data Analysis
+##########################################
+dataUZr1s=data
+dataUZr1s=subset(dataUZr1s, treat=="1" | treat=="2")
+dataUZr1s=subset(dataUZr1s, Tray=="16,23 1228" | Tray=="12,23 1228")
+
+#######################################
+##df BE Rep 1 Plots and Data Analysis##
+#######################################
+dataBEr1=data
+dataBEr1=subset(dataBEr1, strain=="BE")
+dataBEr1=subset(dataBEr1, stage=="L")
+dataBEr1=subset(dataBEr1, treat=="1" | treat=="2")
+dataBEr1=subset(dataBEr1, Tray=="12,23 1201-01"|Tray=="12,23 1201-02"|Tray=="16,23 1202"|Tray=="16,23 1201")
+
+#######################################
+##df BE Rep 2 Plots and Data Analysis##
+#######################################
+dataBEr2=data
+dataBEr2=subset(dataBEr2, strain=="BE")
+dataBEr2=subset(dataBEr2, stage=="L")
+dataBEr2=subset(dataBEr2, treat=="1" | treat=="2")
+dataBEr2=subset(dataBEr2, Tray=="16,23 0206" | Tray=="12,23 0208")
+
+#######################################
+##df UZ Rep 1 Plots and Data Analysis##
+#######################################
+dataUZr1=data
+dataUZr1=subset(dataUZr1, strain=="UZ")
+dataUZr1=subset(dataUZr1, stage=="L")
+dataUZr1=subset(dataUZr1, treat=="1" | treat=="2")
+dataUZr1=subset(dataUZr1, Tray=="16,23 1228" | Tray=="12,23 1228")
+`````
+
+##Larvae Change in Mass Over Time and Stage Plots
+```{r}
+dataBEr1p=dataBEr1
+dataBEr1p=subset(dataBEr1, day<=12)
+ggplot(data=dataBEr1p,aes(x=day,y=mass))+
+  stat_smooth(method="loess")+
+  facet_wrap(~syringe)+
+  ylab("Mass")+xlab("Day")
+
+dataBEr2p=dataBEr2
+dataBEr2p=subset(dataBEr2p, day<=12)
+ggplot(data=dataBEr2p,aes(x=day,y=mass))+
+stat_smooth(method="loess")+
+  facet_wrap(~syringe)+
+  ylab("Mass")+xlab("Day")
+
+dataUZr1p=dataUZr1
+dataUZr1p=subset(dataUZr1p, day<=12)
+ggplot(data=dataUZr1p,aes(x=day,y=mass))+
+stat_smooth(method="loess")+  
+  facet_wrap(~syringe)+
+  ylab("Mass")+xlab("Day")
+```
+
+```{r}
+##BE Rep 1##
+dataBEr1FREQm=dataBEr1
+dataBEr1FREQm=subset(dataBEr1FREQm, treat=="2")
+#Larva MASS: Change Over Time
+ggplot(data=dataBEr1FREQm,aes(x=day,y=mass))+
+  geom_line(aes(group=syringe,color=syringe))+
+  geom_smooth()+
+  theme_classic()+
+  ggtitle("BE Rep1 Non Diapause Larvae Mass Increase")+
+  ylab("Mass")+xlab("Day")+
+  scale_x_continuous(breaks = c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19))+
+  scale_y_continuous(limits=c(0,0.15))+ geom_vline(xintercept=3)+ geom_vline(xintercept=6)
+
+##BE Rep 1##
+dataBEr1FREQm=dataBEr1
+dataBEr1FREQm=subset(dataBEr1FREQm, treat=="1")
+dataBEr1FREQm=subset(dataBEr1FREQm, day<=20)
+#Larva MASS: Change Over Time
+ggplot(data=dataBEr1FREQm,aes(x=day,y=mass))+
+  geom_line(aes(group=syringe,color=syringe))+
+  geom_smooth()+
+  ggtitle("BE Rep1 Diapause Larvae Mass Increase")+
+  ylab("Mass")+xlab("Day")+
+  scale_x_continuous(breaks = c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19))+
+  scale_y_continuous(limits=c(0,0.15))+ geom_vline(xintercept=4)+ geom_vline(xintercept=7)
+
+##BE Rep 1##
+dataBEr1s=subset(dataBEr1s,stage=="L"|stage=="P")
+dataBEr1s=subset(dataBEr1s, treat=="2")
+dataBEr1s=subset(dataBEr1s, day<=20)
+#Stages: Change Over Time
+ggplot(dataBEr1s, aes(x=day, fill=stage))+
+  theme_classic()+
+  geom_histogram(binwidth=.5, alpha=.5, position="identity")+
+  scale_x_discrete(limits=c(1,2,3,4,5,6,7,8,9,10,11,13,15,17))+
+  ggtitle("BE Non Diapause Rep1 Stages")+
+  ylab("# of Insects in each stage")+xlab("Day")
+```
+
+```{r}
+##BE Rep 2 ##
+dataBEr2FREQm=dataBEr2
+dataBEr2FREQm=subset(dataBEr2FREQm, treat=="2")
+#Larva MASS: Change Over Time
+ggplot(data=dataBEr2FREQm,aes(x=day,y=mass))+
+  geom_line(aes(group=syringe,color=syringe))+
+  geom_smooth()+
+  theme_classic()+
+  ggtitle("BE Rep2 Non Diapause Larvae Mass Increase")+
+  ylab("Mass")+xlab("Day")+
+  scale_x_continuous(breaks = c(1,3,4,5,6,8))+
+  scale_y_continuous(limits=c(0,0.15))+ geom_vline(xintercept=2)+ geom_vline(xintercept=4)
+
+##BE Rep 2 ##
+dataBEr2FREQm=dataBEr2
+dataBEr2FREQm=subset(dataBEr2FREQm, treat=="1")
+dataBEr2FREQm=subset(dataBEr2FREQm, day<=20)
+dataBEr2s=subset(dataBEr2s,stage=="L"|stage=="P")
+#Larva MASS: Change Over Time
+ggplot(data=dataBEr2FREQm,aes(x=day,y=mass))+
+  geom_line(aes(group=syringe,color=syringe))+
+  geom_smooth()+
+  ggtitle("BE Rep2 Diapause Larvae Mass Increase")+
+  ylab("Mass")+xlab("Day")+
+  scale_x_continuous(breaks = c(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20))+
+  scale_y_continuous(limits=c(0,0.15))+ geom_vline(xintercept=5)+ geom_vline(xintercept=8)
+
+#Stages: Change Over Time
+ggplot(dataBEr2s, aes(x=day, fill=stage, color=stage))+
+  theme_classic()+
+  geom_histogram(alpha=.3)+
+  scale_x_discrete(limits=c(1,3,4,5,6,8,9,10))+
+  ggtitle("BE Non Diapause Rep2 Stages")+
+  ylab("# of Insects in each stage")+xlab("Day")
+
+
+##UZ Rep 1##
+dataUZr1FREQm=dataUZr1
+dataUZr1FREQm=subset(dataUZr1FREQm, treat=="2")
+#Larva MASS: Change Over Time
+ggplot(data=dataUZr1FREQm,aes(x=day,y=mass))+
+  geom_line(aes(group=syringe,color=syringe))+
+  geom_smooth()+
+  theme_classic()+
+  ggtitle("UZ Rep1 Non Diapause Larvae Mass Increase")+
+  ylab("Mass")+xlab("Day")+
+  scale_x_continuous(breaks = c(1,2,4,5,6,7,10,11,13,14,16,18,19))+
+  scale_y_continuous(limits=c(0,0.15))+ geom_vline(xintercept=4)+ geom_vline(xintercept=6)
+  
+##UZ Rep 1##
+dataUZr1FREQm=dataUZr1
+dataUZr1FREQm=subset(dataUZr1FREQm, treat=="1")
+dataUZr1FREQm=subset(dataUZr1FREQm, day<=20)
+#Larva MASS: Chaqnge Over Time
+ggplot(data=dataUZr1FREQm,aes(x=day,y=mass))+
+  geom_line(aes(group=syringe,color=syringe))+
+  geom_smooth()+
+  theme_classic()+
+  ggtitle("UZ Rep1 Diapause Larvae Mass Increase")+
+  ylab("Mass")+xlab("Day")+
+  scale_x_continuous(breaks = c(1,2,4,5,6,7,10,11,13,14,16,18,19))+
+  scale_y_continuous(limits=c(0,0.15))+ geom_vline(xintercept=4)+ geom_vline(xintercept=8)
+
+##UZ Rep 1##
+dataUZr1s=subset(dataUZr1s,stage!="E")
+dataUZr1s=subset(dataUZr1s,stage!="Pre")
+dataUZr1s=subset(dataUZr1s,stage!="I")
+dataUZr1s=subset(dataUZr1s,stage!="A")
+dataUZr1s=subset(dataUZr1s,treat=="2")
+#Stages: Change Over Time
+ggplot(dataUZr1s, aes(x=day, fill=stage))+
+  theme_classic()+
+  geom_histogram(binwidth=.5, alpha=.5, position="identity")+
+  scale_x_discrete(limits=c(1,2,4,5,6,7,10,11,13,14,16,18,19))+
+  ggtitle("UZ Rep1 Stages")+
+  ylab("# of Insects in each stage")+xlab("Day")
+```
+##CO2 Production Over Time
+````{r}
+##Point Plot: Hourly CO2 production
+dataCO2=data
+dataCO2=subset(dataCO2,treat=="1"|treat=="2")
+dataCO2=subset(dataCO2,day<=12)
+dataCO2=subset(dataCO2,stage=="L")
+dataCO2=subset(dataCO2,Tray!="12,23 1201-02"&Tray!="12,23 1201-01"&Tray!="16,23 1202"&Tray!="16,23 1201")
+ggplot(data=dataCO2,aes(x=day,y=co2_hourly, color=treat))+
+  facet_wrap(~strain)+
+  geom_point()+
+  geom_smooth(method="loess")+
+  theme_classic()+
+  scale_colour_discrete(name="Treatment",breaks=c("1", "2"),labels=c("Diapause", "Non-Diapause"))+
+  ggtitle("Larvae CO2 production")+
+  ylab("CO2 production")
+
+##Point Plot: Hourly CO2 production
+dataCO2=data
+dataCO2=subset(dataCO2,treat=="3"|treat=="4")
+dataCO2=subset(dataCO2,stage=="L")
+ggplot(data=dataCO2,aes(x=day,y=co2_hourly, color=treat))+facet_wrap(~strain)+
+  geom_point()+
+  geom_smooth(method="loess")+
+  theme_classic()+
+  scale_colour_discrete(name="Treatment",breaks=c("3", "4"),labels=c("Diapause", "post45:Non-Diapause"))+
+  ggtitle("Larvae CO2 production")+
+  ylab("CO2 production")
+
+##Point Plot: Hourly CO2 production by mass
+dataCO2m=data
+dataCO2m=subset(dataCO2m,treat=="1"|treat=="2")
+dataCO2m=subset(dataCO2m,day<=12)
+dataCO2m=subset(dataCO2m,stage=="L")
+dataCO2m=subset(dataCO2m,Tray!="12,23 1201-02"&Tray!="12,23 1201-01"&Tray!="16,23 1202"&Tray!="16,23 1201")
+ggplot(data=dataCO2m,aes(x=day,y=co2_hourly_mass, color=treat))+
+  facet_wrap(~strain)+
+  geom_point()+
+  geom_smooth(method="loess")+
+  scale_colour_discrete(name="Treatment",breaks=c("1", "2"),labels=c("Diapause", "Non-Diapause"))+
+  theme_classic()+
+  ggtitle("Larvae CO2 production")+
+  ylab("CO2 production by Mass")
+
+##Point Plot: Hourly CO2 production by mass
+dataCO2m=data
+dataCO2m=subset(dataCO2m,treat=="3"|treat=="4")
+ggplot(data=dataCO2m,aes(x=day,y=co2_hourly_mass, color=treat))+facet_wrap(~strain)+
+  geom_point()+
+  geom_smooth(method="loess")+
+  scale_colour_discrete(name="Treatment",breaks=c("3", "4"),labels=c("Diapause", "post 45:Non-Diapause"))+
+  theme_classic()+
+  ggtitle("Larvae CO2 production")+
+  ylab("CO2 production by Mass")
+````

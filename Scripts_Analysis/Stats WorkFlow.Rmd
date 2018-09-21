@@ -1,0 +1,106 @@
+---
+title: "Stats Workflow"
+author: "James Brown"
+date: "7/24/2018"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(DiagrammeR)
+```
+
+```{r, echo=false}
+#Here are some referneces to sift through: 
+  #https://stats.idre.ucla.edu/other/mult-pkg/whatstat/
+  #https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3116565/
+
+#Question 1: Is there a difference between groups that are unpaired? Tests to address the question: Is there a difference between groups - unpaired (parallel and independent groups) situation?
+
+#Groups or data sets are regarded as unpaired if there is no possibility of the values in one data set being related to or being influenced by the values in the other data sets. Different tests are required for quantitative or numerical data and qualitative or categorical data as shown in Fig. 1. For numerical data, it is important to decide if they follow the parameters of the normal distribution curve (Gaussian curve), in which case parametric tests are applied. If distribution of the data is not normal or if one is not sure about the distribution, it is safer to use non-parametric tests. When comparing more than two sets of numerical data, a multiple group comparison test such as one-way analysis of variance (ANOVA) or Kruskal-Wallis test should be used first. If they return a statistically significant p value (usually meaning p < 0.05) then only they should be followed by a post hoc test to determine between exactly which two data sets the difference lies. Repeatedly applying the t test or its non-parametric counterpart, the Mann-Whitney U test, to a multiple group situation increases the possibility of incorrectly rejecting the null hypothesis.
+
+DiagrammeR::mermaid("
+graph TD
+A[Organize Data] -->|Collect, Annotate, Save| B(Draw Preidction Graphs)
+B --> C{Un-Paired Groups}
+C --> D{Numeric}
+D --> E{Otheriwse}
+E --> P[2 groups use Mann-Whitney U test]
+E --> Q[Wilcox Ranked Sum]
+E --> R[> 2 groups use Kruskall-Wallis H test]
+D --> G[Parametric]
+G --> H[2 groups use unpaired t-test]
+G --> I[>2 use ANOVA or F test]
+C --> J{Categorical}
+J --> K[2 Groups]
+K --> L[Chi square]
+K --> M[Fisher's exact test]
+J --> N[> 2 groups]
+N --> O[Chi suare]
+")
+
+
+#Question 2: Is there a difference between groups which are paired? Tests to address the question: Is there a difference between groups - paired situation?
+
+#Pairing signifies that data sets are derived by repeated measurements (e.g. before-after measurements or multiple measurements across time) on the same set of subjects. Pairing will also occur if subject groups are different but values in one group are in some way linked or related to values in the other group (e.g. twin studies, sibling studies, parent-offspring studies). A crossover study design also calls for the application of paired group tests for comparing the effects of different interventions on the same subjects. Sometimes subjects are deliberately paired to match baseline characteristics such as age, sex, severity or duration of disease. A scheme similar to Fig. 1 is followed in paired data set testing, as outlined in Fig. 2. Once again, multiple data set comparison should be done through appropriate multiple group tests followed by post hoc tests.  
+
+
+DiagrammeR::mermaid("
+graph TD
+A[Organize Data] -->|Collect, Annotate, Save| B(Draw Preidction Graphs)
+B --> C{Paired Groups}
+C --> D{Numeric}
+D --> E{Otheriwse}
+E --> P[2 groups Wilcoxons matched pairs signed rank test]
+E --> Q[> 2 groups Friedmans ANOVA]
+D --> G[Parametric]
+G --> H[2 groups use paired t-test]
+G --> I[>2 use repeated measures ANOVA]
+C --> J{Categorical}
+J --> K[2 Groups]
+K --> L[McNemars Test]
+K --> M[McNemers test exact variants]
+J --> N[> 2 groups]
+N --> O[Cochrans Q test]
+")
+
+
+#Question 3: Is there any association between variables? 
+
+#The various tests applicable are outlined in Fig. 3. It should be noted that the tests meant for numerical data are for testing the association between two variables. These are correlation tests and they express the strength of the association as a correlation coefficient. An inverse correlation between two variables is depicted by a minus sign. All correlation coefficients vary in magnitude from 0 (no correlation at all) to 1 (perfect correlation). A perfect correlation may indicate but does not necessarily mean causality. When two numerical variables are linearly related to each other, a linear regression analysis can generate a mathematical equation, which can predict the dependent variable based on a given value of the independent variable.[2] Odds ratios and relative risks are the staple of epidemiologic studies and express the association between categorical data that can be summarized as a 2 × 2 contingency table. Logistic regression is actually a multivariate analysis method that expresses the strength of the association between a binary dependent variable and two or more independent variables as adjusted odds ratios.
+
+
+DiagrammeR::mermaid("
+graph TD
+A[Organize Data] -->|Collect, Annotate, Save| C(Draw Preidction Graphs)
+C --> D{Association Between Groups}
+D --> E{Otheriwse}
+E --> P[Spearmans p]
+E --> Q[Kendalls t]
+D --> G[Parametric]
+G --> H[Pearsons Producr moment correlation coeff, r]
+C --> J{Categorical}
+J --> K[2 x 2 data]
+K --> L[Relative Risk or risk ratio]
+K --> M[Odds ratios]
+J --> N[Otherwise]
+N --> O[Chi-square test for trend logistic regression]
+")
+
+
+#Question 4: Is there agreement between data sets? Tests to address the question: Is there an agreement between assessment (screening / rating / diagnostic) techniques?
+
+#This can be a comparison between a new screening technique against the standard test, new diagnostic test against the available gold standard or agreement between the ratings or scores given by different observers. As seen from Fig. 4, agreement between numerical variables may be expressed quantitatively by the intraclass correlation coefficient or graphically by constructing a Bland-Altman plot in which the difference between two variables x and y is plotted against the mean of x and y. In case of categorical data, the Cohen's Kappa statistic is frequently used, with kappa (which varies from 0 for no agreement at all to 1 for perfect agreement) indicating strong agreement when it is > 0.7. It is inappropriate to infer agreement by showing that there is no statistically significant difference between means or by calculating a correlation coefficient.
+
+
+DiagrammeR::mermaid("
+graph TD
+A{Data Set}
+A --> B{Numerical Data}
+B --> C[Intraclass correlation coeff/ quant method/ Bland Altman plot]
+A --> D{Categorical Data}
+D --> E[CohensKappa statistic]
+")
+```

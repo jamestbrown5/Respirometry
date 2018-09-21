@@ -1,0 +1,195 @@
+---
+title: "20180204 Respirometry UZ" #Goal: To track the production of CO2 in ECB larvae experiencing long day and short day conditions with the intent of phenotyping diapausing larvae.
+output: html_document
+editor_options: 
+chunk_output_type: console
+---
+#Libraries and Reading in Data
+````{r}
+##Read in the data
+#PC
+setwd("/Users/jbrown/Documents/GitHub/Respirometry/Data/")
+data=read_excel("Respir.xlsx")
+
+
+#MAC
+#data=read_excel("/Users/JamesB/Google Drive/Graduate School/Self_JamesTBrown/GitHub/Respirometry/Data/Respir.xlsx", sheet = "Sheet1")
+
+##Set "syringe" identifier as a number
+data$syringe=as.numeric(data$syringe)
+##Set "treat" (read:treatment) as a factor (read:independent variable)
+data$treat=as.factor(data$treat)
+##Remove Nas
+na.omit(data)
+`````
+
+#Plots of CO2 production over time
+`````{r}
+##Avoiding (read:subset) non target data
+dataUZ=data
+dataUZ=subset(dataUZ,dataUZ$strain!="BE")
+dataUZ=subset(dataUZ,dataUZ$treat!="3")
+dataUZ=subset(dataUZ,dataUZ$treat!="4")
+dataUZ=subset(dataUZ, stage=="L")
+par(mfrow=c(1,1))
+
+#INDIVIDUAL POINT PLOTS: Hourly CO2 production per day
+ggplot(data=dataUZ,aes(x=day,y=co2_hourly))+
+  geom_point()+geom_line()+
+  ggtitle("UZ Larvae Hourly CO2 production") +
+  ylab("CO2 production")+
+  facet_wrap(~syringe)+
+  scale_x_continuous(breaks = c(5,15,30,45,60))+
+  scale_y_continuous(limits=c(0,8))
+
+#INDIVIDUAL POINT PLOTS: Hourly CO2 production by mass
+ggplot(data=dataUZ,aes(x=day,y=co2_hourly_mass))+
+  geom_point()+geom_line()+
+  ggtitle("UZ Larvae Hourly CO2 production by Mass")+
+  ylab("CO2 production by mass")+
+  facet_wrap(~syringe)+
+  scale_x_continuous(breaks = c(5,15,30,45,60))+
+  scale_y_continuous(limits=c(0,10))
+
+##MERGED LINE PLOT: Hourly CO2 production
+ggplot(data=dataUZ,aes(x=day,y=co2_hourly,color=treat))+
+  theme_classic()+geom_smooth(method="lm")+
+  ggtitle("UZ Larvae Hourly CO2 production")+
+  ylab("UZ Larvae CO2 production")+
+  scale_colour_discrete(name="Treatment",
+  breaks=c("1", "2"),labels=c("Diapause", "Non-Diapause"))+
+  geom_point()+stat_smooth(method = "lm")+
+  scale_x_continuous(breaks = c(5,10,15,20,25,30,35,40,45,50,55,60))+
+  scale_y_continuous(limits=c(0,8))
+
+
+##MERGED LINE PLOT: Hourly CO2 production
+ggplot(data=dataUZ,aes(x=day,y=co2_hourly_mass,color=treat))+
+  geom_point()+stat_smooth(method="lm")+
+  theme_classic()+
+  ggtitle("UZ Larvae Hourly CO2 production by Mass")+
+  ylab("CO2 production by mass")+
+  scale_colour_discrete(name="Treatment",
+  breaks=c("1", "2"),labels=c("Diapause", "Non-Diapause"))+
+  scale_x_continuous(breaks = c(5,10,15,20,25,30,35,40,45,50,55,60))+
+  scale_y_continuous(limits=c(0,100))
+
+
+## Significance of photoperiod and/or day to explain hourly CO2 production 
+modlmm=lmer(co2_hourly ~ treat + (1|date), data=dataUZ)
+summary(modlmm)
+plot(modlmm)
+
+modlmm=lmer(co2_hourly_mass ~ treat + (1|date), data=dataUZ)
+summary(modlmm)
+plot(modlmm)
+
+`````
+
+
+
+##Frequency Distributions of UZ Larvae and Pupae
+```{r}
+#MASS: Increase across time
+dataFREQm=data
+dataFREQm=subset(data,dataFREQm$strain!="BE")
+dataFREQm=subset(dataFREQm,stage=="L")
+
+ggplot(data=dataFREQm,aes(x=day,y=mass,color=treat))+
+  geom_point()+stat_smooth(method="lm")+
+  theme_classic()+
+  ggtitle("UZ Larvae Mass Increase")+
+  ylab("Mass")+xlab("Day")+
+  scale_colour_discrete(name="Treatment",breaks=c("1", "2"),labels=c("Diapause", "Non-Diapause"))+
+  scale_x_continuous(breaks = c(10,20,30,35,40,50))+
+  scale_y_continuous(limits=c(0,0.20))
+
+ggplot(data=dataFREQm,aes(x=co2_hourly,y=mass,color=treat))+
+  geom_point()+stat_smooth(method="lm")+
+  theme_classic()+
+  ggtitle("UZ Larvae Mass Increase")+
+  ylab("Mass")+xlab("CO2 Production")+
+  scale_colour_discrete(name="Treatment",breaks=c("1", "2"),labels=c("Diapause", "Non-Diapause"))+
+  scale_x_continuous(breaks = c(0,1,2,3,4,5,6,7,8,9,10))+
+  scale_y_continuous(limits=c(0,0.20))
+
+#PUPA: Distribution across time
+dataFREQp=data
+dataFREQp=subset(dataFREQp, strain=="UZ")
+dataFREQp=subset(dataFREQp, treat=="1")
+
+ggplot(dataFREQp, aes(day, fill = stage))+
+  theme_classic()+
+  geom_bar()+
+  labs(title = "Larvae stage across time", x = "Day", y = "Number of Individuals")
+
+#PUPA: Distribution across time
+dataFREQp=data
+dataFREQp=subset(dataFREQp, strain=="UZ")
+dataFREQp=subset(dataFREQp, stage=="P")
+
+ggplot(dataFREQp, aes(day, fill = treat))+
+  theme_classic()+
+  geom_bar()+
+  labs(title = "Number of Pupae across time", x = "Day", y = "Number of Individuals")
+  
+
+
+```
+
+
+#Parsing CO2 production by day
+##Determimning When to Sample UZ by
+````{r}
+##Subset data by "day" number and making treatment a factor
+dataa=data
+dataa=subset(data, day>0 & day<11)
+dataa=subset(dataa, dataa$co2_hourly_mass!="NA")
+dataa=subset(dataa, dataa$stage=="L")
+mod=aov(dataa$co2_hourly_mass~dataa$treat)
+dataa$stdresd<-as.vector(scale(resid(mod)))
+summary(mod)
+````
+
+##Plotting CO2 for the 1st 10 days
+````{r}
+
+##Plotting CO2 production for the first 10 days 
+ggplot(dataa,aes(x=day,y=co2_hourly_mass,color=treat))+geom_point()+geom_smooth(method="lm")+labs(title="Day 1 thru 10 UZ Larvae",x ="Day", y = "Hourly CO2 Production by Mass")+scale_colour_discrete(name="Treatment",
+  breaks=c("1", "2"),labels=c("Diapause", "Non-Diapause"))
+
+dataa=subset(dataa, day>0 & day<11)
+mod=aov(dataa$co2_hourly~dataa$treat)
+ggplot(dataa,aes(x=factor(day),y=stdresd))+
+  geom_boxplot(aes(fill=treat))+labs(title="Day 1 thru 10 UZ Larvae",x ="Day", y = "Hourly CO2 Production by Mass")+
+  scale_fill_discrete("",breaks=c("1","2"), labels=c("Diapause", "Non Diapause"))
+
+##Mass Accumulation
+ggplot(dataa,aes(x=day,y=mass,color=treat))+geom_point()+geom_smooth(method="lm")+labs(title="Day 1 thru 10 UZ Larvae Mass Increase",x ="Day", y = "Mass")+scale_colour_discrete(name="Treatment",
+  breaks=c("1", "2"),labels=c("Diapause", "Non-Diapause"))
+
+````
+
+#Comparing the Means
+````{r}
+day1=subset(dataa, day>0 & day<2)
+mod1=aov(day1$co2_hourly~day1$treat)
+summary(mod1)
+
+day2=subset(dataa, day>1 & day<3)
+mod2=aov(day2$co2_hourly~day2$treat)
+summary(mod2)
+
+day4=subset(dataa, day>3 & day<5)
+mod4=aov(day4$co2_hourly~day4$treat)
+summary(mod4)
+
+day5=subset(dataa, day>4 & day<6)
+mod5=aov(day5$co2_hourly~day5$treat)
+summary(mod5)
+````
+
+#Repeated Measures
+````{r}
+
+````

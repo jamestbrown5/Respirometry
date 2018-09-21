@@ -1,0 +1,477 @@
+---
+title: "Respirometry Nonlinear Model Analysis"
+author: "James Brown"
+date: "7/25/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+##Call Data
+````{r}
+library(lattice)
+library(reshape2)
+library(growthcurver)
+library(purrr)
+library(splines)
+library(stats)
+library(readxl)
+library(ggplot2)
+library(nlme)
+library(lme4)
+library(lmerTest)
+library(ez)
+library(lsr)
+library(dplyr)
+library(tidyr)
+library(googleVis)
+library(MASS)
+library(doBy)
+library(plyr)
+library(tidyverse)
+#############--------------Read in the data-----------------######################
+#PC
+setwd("/Users/jbrown/Documents/GitHub/Respirometry/Data/")
+data=read_excel("Respir.xlsx")
+
+
+#MAC
+#data=read_excel("/Users/JamesB/Google Drive/Graduate School/Self_JamesTBrown/GitHub/Respirometry/Data/Respir.xlsx", sheet = "Sheet1")
+
+############## Data Prep ###################
+data=subset(data, VCO2!="NA") # Remove NAs from df
+data=subset(data, syringe!="Blank Control") #Removing "Blank Control" syringes
+data$syringe=as.character(data$syringe) #Set "syringe" as a character
+data$strain<-as.factor(data$strain) #set strain as ind var
+data$treat<-as.factor(data$treat) #set treat as factor as ind var
+````
+
+##Dataframe Setup
+````{r}
+##########################################
+#df BE Rep1 Stages Plots and Data Analysis
+##########################################
+dataBEr1s=data #subset of main df into BE rep1
+dataBEr1s=subset(dataBEr1s, treat=="1" | treat=="2")
+dataBEr1s=subset(dataBEr1s, Tray=="12,23 1201-01"|Tray=="12,23 1201-02"|Tray=="16,23 1202"|Tray=="16,23 1201")
+
+##########################################
+#df BE Rep2 Stages Plots and Data Analysis
+##########################################
+dataBEr2s=data #subset of main df into BE rep 2
+dataBEr2s=subset(dataBEr2s, treat=="1" | treat=="2")
+dataBEr2s=subset(dataBEr2s, treat=="1" | stage=="L")
+dataBEr2s=subset(dataBEr2s, Tray=="16,23 0206" | Tray=="12,23 0208")
+dataBEr2s=subset(dataBEr2s,co2_hourly_mass!="NA")
+
+##########################################
+#df UZ Rep1 Stages Plots and Data Analysis
+##########################################
+dataUZr1s=data #subset of main df into UZ rep 1
+dataUZr1s=subset(dataUZr1s, treat=="1" | treat=="2")
+dataUZr1s=subset(dataUZr1s, treat=="1" | stage=="L")
+dataUZr1s=subset(dataUZr1s, Tray=="16,23 1228" | Tray=="12,23 1228")
+dataUZr1s=subset(dataUZr1s,co2_hourly_mass!="NA")
+`````
+
+```{r}
+#plot
+ggplot(dataBEr2s, aes(x = day, y = mass)) + geom_point(alpha=0.7)
+
+#simplify df
+df <- dataBEr2s %>% filter(day<=40)
+model.wt <- SummarizeGrowth(df$day, df$mass)
+
+# gives you all the values (the growth rate etc. See the Growthcurver manual for more info)
+model.wt$vals 
+
+#gives you the predicted OD values (according to the model)
+predict(model.wt$model)
+
+#plot the model
+plot(model.wt)
+
+p1 <- ggplot(df, aes(x=day,y=mass)) + geom_point(alpha=0.5) + theme_bw()
+p1
+
+df.predicted <- data.frame(time = df$day, pred.wt = predict(model.wt$model))
+p1 + geom_line(data=df.predicted, aes(y=df.predicted$pred.wt), color="red")
+```
+
+
+```{r}
+#Growth Curve Analysis
+
+m1 <- lme(mass ~ day, data=dataBEr2s, random= ~ day | syringe, method="ML")
+summary(m1)
+plot(m1)
+
+m2 <- lme(mass ~ day*(day^2), data=dataBEr2s, random= ~ day | syringe, method="ML")
+summary(m2)
+plot(m2)
+
+m3 <- lme(mass ~ I(day^2)+I(day^3), data=dataBEr2s, random= ~ day | syringe, method="ML")
+summary(m3)
+plot(m3)
+
+#Comparing the models
+anova(m1,m2)
+anova(m1,m3)
+anova(m2,m3)
+
+#effect of treatment on slope
+m2a <- lme(mass ~ I(day^2)+I(day^3)+treat, data=dataBEr2s, random= ~ day | syringe, method="ML")
+summary(m2a)
+
+#effect of treatment on time
+m2b <- lme(mass ~ day*I(day^2)+treat*day, data=dataBEr2s, random= ~ day | syringe, method="ML")
+summary(m2b)
+```
+
+```{r}
+#Linear Model Fit
+dataBEr2s=subset(dataBEr2s,treat="1")
+x=dataBEr2s$day
+y=dataBEr2s$mass
+
+#plot
+plot(y ~ x, pch=20,main = "Mass Increase")
+
+#fit lm with a polynomial equation:
+fit  <- lm(y~x)
+#second degree
+fit2 <- lm(y~poly(x,2,raw=TRUE))
+#third degree
+fit3 <- lm(y~poly(x,3,raw=TRUE))
+#fourth degree
+fit4 <- lm(y~poly(x,4,raw=TRUE))
+#fifth degree
+fit5 <- lm(y~poly(x,5,raw=TRUE))
+#sixth degree
+fit6 <- lm(y~poly(x,6,raw=TRUE))
+#seventh degree
+fit7 <- lm(y~poly(x,7,raw=TRUE))
+
+#Checking assumptions
+plot(fit)
+plot(fit2)
+plot(fit3)
+plot(fit4)
+plot(fit5)
+plot(fit6)
+plot(fit7)
+
+
+#generate range of 50 numbers starting from 0 and ending at 50
+xx <- seq(0,50, length=50)
+plot(x,y,pch=20,ylim=c(0,0.15))
+lines(xx, predict(fit, data.frame(x=xx)), col="red")
+lines(xx, predict(fit2, data.frame(x=xx)), col="green")
+lines(xx, predict(fit3, data.frame(x=xx)), col="blue")
+lines(xx, predict(fit4, data.frame(x=xx)), col="yellow")
+lines(xx, predict(fit5, data.frame(x=xx)), col="orange")
+lines(xx, predict(fit6, data.frame(x=xx)), col="purple")
+lines(xx, predict(fit7, data.frame(x=xx)), col="pink")
+
+
+#We can see how well each curve fits. Comparing the R-squared values
+summary(fit)
+summary(fit2)
+summary(fit3)
+summary(fit4)
+summary(fit5)
+summary(fit6)
+summary(fit7)
+
+#We can compare different models with an Analysis of Variance:
+anova(fit,fit2) #fit2
+anova(fit,fit3) #fit3
+anova(fit,fit4) #fit4
+anova(fit,fit5) #fit5
+anova(fit,fit6) #fit6
+anova(fit,fit7) #fit7
+anova(fit2,fit3) #fit3
+anova(fit2,fit4) #fit4
+anova(fit2,fit5) #fit5
+anova(fit2,fit6) #fit6
+anova(fit2,fit7) #fit7
+anova(fit3,fit4) #fit4
+anova(fit3,fit5) #fit5
+anova(fit3,fit6) #fit6
+anova(fit3,fit7) #fit7
+anova(fit4,fit5) #fit5
+anova(fit4,fit6) #fit6
+anova(fit4,fit7) #fit7
+anova(fit5,fit6) #fit6
+anova(fit5,fit7) #fit5
+anova(fit6,fit7) #fit6
+
+#A function that reflects the polynomial equation
+#y=ax^3 + bx^2 + c
+coef(fit3)
+#create function for the third order polynomial
+third_order <- function(newdist, model) {
+    coefs <- coef(model)
+    #y = d + cx + bx^2 + ax^3
+    res <- coefs[1] + (coefs[2] * newdist) + (coefs[3] * newdist^2) + (coefs[4] * newdist^3)
+    return(res)
+}
+yy <- third_order(xx,fit3)
+plot(xx,yy,type="l")
+lines(x,y,type="p",col="red")
+
+#https://davetang.org/muse/2013/05/09/on-curve-fitting/
+```
+
+```{r}
+################### BEr2 Diapause ###################
+#Linear Model Fit
+dataBEr2sd=dataBEr2s
+dataBEr2sd=subset(dataBEr2sd,treat=="1")
+x=dataBEr2sd$day
+y=dataBEr2sd$mass
+
+#plot
+plot(y ~ x, pch=20, main = "Mass Increase")
+
+#third degree
+fit3b <- lm(y~poly(x,3,raw=TRUE))
+
+#Checking assumptions
+plot(fit3b)
+
+#generate range of 50 numbers starting from 0 and ending at 50
+xx <- seq(0,45, length=50)
+plot(x,y,pch=20,ylim=c(0,0.15))
+lines(xx, predict(fit3b, data.frame(x=xx)), col="blue")
+
+
+#We can see how well each curve fits. Comparing the R-squared values
+summary(fit3b)
+
+#A function that reflects the polynomial equation
+#y=ax^3 + bx^2 + c
+coef(fit3b)
+#create function for the third order polynomial
+third_order <- function(newdist, model) {
+    coefs <- coef(model)
+    #y = d + cx + bx^2 + ax^3
+    res <- coefs[1] + (coefs[2] * newdist) + (coefs[3] * newdist^2) + (coefs[4] * newdist^3)
+    return(res)
+}
+yy <- third_order(xx,fit3b)
+plot(xx,yy,type="l",ylim=c(0,0.15))
+lines(x,y,type="p",col="red")
+
+
+################### BEr2 Non Diapause ###################
+#Linear Model Fit
+dataBEr2sn=dataBEr2s
+dataBEr2sn=subset(dataBEr2sn,treat=="2")
+x=dataBEr2sn$day
+y=dataBEr2sn$mass
+
+#plot
+plot(y ~ x, pch=20, main = "Mass Increase")
+
+#third degree
+fit3bn <- lm(y~poly(x,3,raw=TRUE))
+
+#Checking assumptions
+plot(fit3bn)
+
+#generate range of 50 numbers starting from 0 and ending at 50
+xx <- seq(0,8, length=50)
+plot(x,y,pch=20,ylim=c(0,0.15))
+lines(xx, predict(fit3bn, data.frame(x=xx)), col="blue")
+
+
+#We can see how well each curve fits. Comparing the R-squared values
+summary(fit3bn)
+
+#A function that reflects the polynomial equation
+#y=ax^3 + bx^2 + c
+coef(fit3bn)
+#create function for the third order polynomial
+third_order <- function(newdist, model) {
+    coefs <- coef(model)
+    #y = d + cx + bx^2 + ax^3
+    res <- coefs[1] + (coefs[2] * newdist) + (coefs[3] * newdist^2) + (coefs[4] * newdist^3)
+    return(res)
+}
+yy <- third_order(xx,fit3bn)
+plot(xx,yy,type="l",ylim=c(0,0.15))
+lines(x,y,type="p",col="red")
+
+
+#https://davetang.org/muse/2013/05/09/on-curve-fitting/
+
+```
+
+```{r}
+################### UZr1 Diapause ###################
+#Linear Model Fit
+dataUZr1sd=dataUZr1s
+dataUZr1sd=subset(dataUZr1sd,treat=="1")
+x=dataUZr1sd$day
+y=dataUZr1sd$mass
+
+#plot
+plot(y ~ x, pch=20, main = "Mass Increase")
+
+#third degree
+fit3 <- glm(y~I(1/x),data=dataUZr1sd)
+
+#Checking assumptions
+plot(fit3)
+
+#generate range of 50 numbers starting from 0 and ending at 50
+xx <- seq(0,45, length=25)
+plot(x,y,pch=20,ylim=c(0,0.16))
+lines(xx, predict(fit3, data.frame(x=xx)), col="blue")
+
+
+#We can see how well each curve fits. Comparing the R-squared values
+summary(fit3)
+
+#A function that reflects the polynomial equation
+#y=ax^3 + bx^2 + c
+coef(fit3)
+#create function for the third order polynomial
+third_order <- function(newdist, model) {
+    coefs <- coef(model)
+    #y = d + cx + bx^2 + ax^3
+    res <- coefs[1] + (coefs[2] * newdist) + (coefs[3] * newdist^2) + (coefs[4] * newdist^3)
+    return(res)
+}
+yy <- third_order(xx,fit3)
+plot(xx,yy,type="l",ylim=c(0,0.16))
+lines(x,y,type="p",col="red")
+
+
+################### UZr1 Non Diapause ###################
+#Linear Model Fit
+dataUZr1sn=dataUZr1s
+dataUZr1sn=subset(dataUZr1sn,treat=="2")
+x=dataUZr1sn$day
+y=dataUZr1sn$mass
+
+#plot
+plot(y ~ x, pch=20, main = "Mass Increase")
+
+#third degree
+fit3n <- lm(y~poly(x,3,raw=TRUE))
+
+#Checking assumptions
+plot(fit3n)
+
+#generate range of 50 numbers starting from 0 and ending at 50
+xx <- seq(0,10, length=25)
+plot(x,y,pch=20,ylim=c(0,0.16))
+lines(xx, predict(fit3n, data.frame(x=xx)), col="blue")
+
+
+#We can see how well each curve fits. Comparing the R-squared values
+summary(fit3n)
+
+#A function that reflects the polynomial equation
+#y=ax^3 + bx^2 + c
+coef(fit3n)
+#create function for the third order polynomial
+third_order <- function(newdist, model) {
+    coefs <- coef(model)
+    #y = d + cx + bx^2 + ax^3
+    res <- coefs[1] + (coefs[2] * newdist) + (coefs[3] * newdist^2) + (coefs[4] * newdist^3)
+    return(res)
+}
+yy <- third_order(xx,fit3n)
+plot(xx,yy,type="l",ylim=c(0,0.16))
+lines(x,y,type="p",col="red")
+#https://davetang.org/muse/2013/05/09/on-curve-fitting/
+```
+
+```{r}
+#Fitting Grouped Data with a Model::BEr2
+#Model Creation where Vm is the upper limit and K is the x axis value where Vm is half
+
+xyplot(mass~day,xlim=c(0,50),data=dataBEr2s)
+
+BE12_BE16 <- nls(mass ~ Vm[treat] * day/(K[treat] + day), data = dataBEr2s, start = list(K = c(1, 4), Vm = c(0.01, 0.15)))
+summary(BE12_BE16)
+
+BE12_BE16.m <- nls(mass ~ Vm * day/(K + day), data = dataBEr2s, start = list(K = 4, Vm = 0.15))
+summary(BE12_BE16.m)
+
+#Comparing the Models of each treatment, globally. This shows that the two groups differ and null can be rejected
+anova(BE12_BE16,BE12_BE16.m)
+
+#Model comparison of the max values Vm when Vm is 0.15. The inflection point of the model is different beteen the two groups
+BE12_BE16.m1 <- nls(mass ~ Vm * day/(K[treat] + day), data = dataBEr2s, start = list(K = c(1, 4), Vm = 0.15))
+anova(BE12_BE16.m,BE12_BE16.m1)
+
+#Model comparison to the null. Testing the rate between the two groups. Is there a difference in the time it takes for mass to reach the halfway mark between 0 and 0.15
+BE12_BE16.m2 <- nls(mass ~ Vm[treat] * day/(K + day), data = dataBEr2s, start = list(K = 4, Vm = c(0.01,0.15))) 
+
+anova(BE12_BE16,BE12_BE16.m2)#the rates are NOT sig different, this meas the rates to max are NOT different!!!!!
+
+summary(BE12_BE16.m2)
+
+#Fitting Grouped Data with a Model::UZr1
+#Model Creation where Vm is the upper limit and K is the x axis value where Vm is half
+xyplot(mass~day,xlim=c(0,50),data=dataUZr1s)
+
+UZ12_UZ16 <- nls(mass ~ Vm[treat] * day/(K[treat] + day), data = dataUZr1s, start = list(K = c(1, 7), Vm = c(0.01, 0.15)))
+summary(UZ12_UZ16)
+
+UZ12_UZ16.m <- nls(mass ~ Vm * day/(K + day), data = dataUZr1s, start = list(K = 7, Vm = 0.15))
+summary(UZ12_UZ16.m)
+
+#Comparing the Models of each treatment, globally. This shows that the two groups differ and null can be rejected
+anova(UZ12_UZ16,UZ12_UZ16.m)
+
+#Model comparison of the max values Vm when Vm is 0.15. The inflection point of the model is different beteen the two groups
+UZ12_UZ16.m1 <- nls(mass ~ Vm * day/(K[treat] + day), data = dataUZr1s, start = list(K = c(1, 7), Vm = 0.15))
+anova(UZ12_UZ16.m,UZ12_UZ16.m1)
+
+#Model comparison to the null. Testing the rate between the two groups. Is there a difference in the time it takes for mass to reach the halfway mark between 0 and 0.15
+UZ12_UZ16.m2 <- nls(mass ~ Vm[treat] * day/(K + day), data = dataUZr1s, start = list(K = 7, Vm = c(0.01,0.15))) 
+
+anova(UZ12_UZ16,UZ12_UZ16.m2)#the rates are sig different, this meas the rates to max are different!!!!!
+
+summary(UZ12_UZ16)
+summary(UZ12_UZ16.m2)
+```
+
+```{r}
+
+#Task 1: Plot the points along with the known theroitical function
+
+#Select and Group individuals Mass Recordings
+
+data=df%>%
+  dyplr::group_by(start) %>% #do the count by family
+  arrange(day,syringe,mass) %>% #sort by date
+  mutate(callindex=1:n()) #create call index that's 1:end for each family
+
+head(df[,c('treat','callindex')])
+
+https://www.r-project.org/conferences/useR-2010/slides/Rosseel.pdf
+https://www.r-bloggers.com/guidebook-for-growth-curve-analysis/
+  https://cran.r-project.org/web/packages/sem/sem.pdf
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+

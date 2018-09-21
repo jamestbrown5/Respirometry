@@ -1,0 +1,124 @@
+---
+title: "Linear Regression of First 12 days"
+author: "James Brown"
+date: "7/27/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+##Call Data
+````{r}
+library(lattice)
+library(reshape2)
+library(growthcurver)
+library(purrr)
+library(splines)
+library(stats)
+library(readxl)
+library(ggplot2)
+library(nlme)
+library(lme4)
+library(lmerTest)
+library(ez)
+library(lsr)
+library(dplyr)
+library(tidyr)
+library(googleVis)
+library(MASS)
+library(doBy)
+library(plyr)
+library(tidyverse)
+#############--------------Read in the data-----------------######################
+#PC
+#setwd("/Users/jbrown/Documents/GitHub/Respirometry/Data/")
+#data=read_excel("Respir.xlsx")
+
+
+#MAC
+data=read_excel("/Users/JamesB/Google Drive/Graduate School/Self_JamesTBrown/GitHub/Respirometry/Data/Respir.xlsx", sheet = "Sheet1")
+
+############## Data Prep ###################
+data=subset(data, VCO2!="NA") # Remove NAs from df
+data=subset(data, syringe!="Blank Control") #Removing "Blank Control" syringes
+data$syringe=as.character(data$syringe) #Set "syringe" as a character
+data$strain<-as.factor(data$strain) #set strain as ind var
+data$treat<-as.factor(data$treat) #set treat as factor as ind var
+````
+
+##Dataframe Setup
+````{r}
+##########################################
+#df BE Rep1 Stages Plots and Data Analysis
+##########################################
+dataBEr1s=data #subset of main df into BE rep1
+dataBEr1s=subset(dataBEr1s, treat=="1" | treat=="2")
+dataBEr1s=subset(dataBEr1s, Tray=="12,23 1201-01"|Tray=="12,23 1201-02"|Tray=="16,23 1202"|Tray=="16,23 1201")
+
+##########################################
+#df BE Rep2 Stages Plots and Data Analysis
+##########################################
+dataBEr2s=data #subset of main df into BE rep 2
+dataBEr2s=subset(dataBEr2s, treat=="1" | treat=="2")
+dataBEr2s=subset(dataBEr2s, treat=="1" | stage=="L")
+dataBEr2s=subset(dataBEr2s, Tray=="16,23 0206" | Tray=="12,23 0208")
+dataBEr2s=subset(dataBEr2s,co2_hourly_mass!="NA")
+
+
+##########################################
+#df UZ Rep1 Stages Plots and Data Analysis
+##########################################
+dataUZr1s=data #subset of main df into UZ rep 1
+dataUZr1s=subset(dataUZr1s, treat=="1" | treat=="2")
+dataUZr1s=subset(dataUZr1s, treat=="1" | stage=="L")
+dataUZr1s=subset(dataUZr1s, Tray=="16,23 1228" | Tray=="12,23 1228")
+dataUZr1s=subset(dataUZr1s,co2_hourly_mass!="NA")
+`````
+
+```{r}
+#Plot BE rep2 data Diapause
+df=subset(dataBEr2s,treat=="1")
+df=subset(df,day=="1"|day=="2"|day=="3"|day=="4"|day=="5"|day=="6")
+scatter.smooth(x=df$day, y=df$mass, main="BE Diapause Daily Mass Increase")  # scatterplot
+
+#linear model
+linearMod <- lm(day ~ mass, data=df)  # build linear regression model on full data
+print(linearMod)
+summary(linearMod)
+
+#Plot BE rep2 data NON Diapause
+df1=subset(dataBEr2s,treat=="2")
+df1=subset(df1,day=="1"|day=="2"|day=="3")
+scatter.smooth(x=df1$day, y=df1$mass, main="BE Non DIapause Daily Mass Increase")  # scatterplot
+
+#linear model
+linearMod1 <- lm(day ~ mass, data=df1)  # build linear regression model on full data
+print(linearMod1)
+summary(linearMod1)
+
+#Plot UZ rep1 data Diapause
+df2=subset(dataUZr1s,treat=="1")
+df2=subset(df2,day=="1"|day=="2"|day=="3"|day=="4"|day=="5"|day=="6")
+scatter.smooth(x=df2$day, y=df2$mass, main="UZ Diapause Daily Mass Increase")  # scatterplot
+
+#linear model
+linearModu <- lm(day ~ mass, data=df2)  # build linear regression model on full data
+print(linearModu)
+summary(linearModu)
+
+#Plot UZ rep2 data NON Diapause
+df3=subset(dataUZr1s,treat=="2")
+df3=subset(df3,day=="1"|day=="2"|day=="3"|day=="4")
+scatter.smooth(x=df3$day, y=df3$mass, main="UZ Non DIapause Daily Mass Increase")  # scatterplot
+
+#linear model
+linearModu1 <- lm(day ~ mass, data=df3)  # build linear regression model on full data
+print(linearModu1)
+summary(linearModu1)
+
+#compare time points within groups
+#BE12 and BE16
+dataBEr2s=subset(dataBEr2s,day=="3")
+
+```
