@@ -26,7 +26,7 @@ library(plyr)
 
 #############--------------Read in the data-----------------######################
 #PC
-setwd("/Users/jbrown/Documents/GitHub/Nutrition and Diapause/Respirometry/Data")
+setwd("/Users/jbrown/Documents/GitHub/Respirometry/Data")
 data=read_excel("Respir.xlsx")
 
 
@@ -119,6 +119,7 @@ ggplot(dataBEr1p, aes(x=day, fill=stage))+
   ylab("# of Insects in each stage")+xlab("Day")
 ```
 
+##BE Rep1 Stats
 ```{r}
 ##############################################
 ###### BE Rep 1 Peak Mass Comaprison #########
@@ -190,6 +191,7 @@ ggplot(data=dataBEr2m,aes(x=day,y=mass))+
   ylab("Mass")+xlab("Day")
 
 
+
 ##BE Rep 2##
 dataBEr2p=subset(dataBEr2s,stage=="L"|stage=="P")
 dataBEr2p=subset(dataBEr2p, treat=="2")
@@ -199,6 +201,8 @@ dataBEr2p=subset(dataBEr2p, day<=20)
 ggplot(dataBEr2p, aes(x=day, fill=stage))+
   geom_density(alpha=.3)+
   ggtitle("BE Non Diapause Rep2 Stages")
+
+
 
 ggplot(dataBEr2p, aes(x=day, fill=stage))+
   theme_classic()+
