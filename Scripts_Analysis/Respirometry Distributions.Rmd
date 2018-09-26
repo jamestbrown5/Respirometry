@@ -55,7 +55,7 @@ dataBEr1s=subset(dataBEr1s, Tray=="12,23 1201-01"|Tray=="12,23 1201-02"|Tray=="1
 ##########################################
 dataBEr2s=data #subset of main df into BE rep 2
 dataBEr2s=subset(dataBEr2s, treat=="1" | treat=="2")
-dataBEr2s=subset(dataBEr2s, Tray=="16,23 0206" | Tray=="12,23 0208")
+dataBEr2s=subset(dataBEr2s, Tray=="16,23 0208" | Tray=="12,23 0208")
 
 ##########################################
 #df UZ Rep1 Stages Plots and Data Analysis
@@ -64,8 +64,98 @@ dataUZr1s=data #subset of main df into UZ rep 1
 dataUZr1s=subset(dataUZr1s, treat=="1" | treat=="2")
 dataUZr1s=subset(dataUZr1s, Tray=="16,23 1228" | Tray=="12,23 1228")
 `````
+## Treatment comparison of chainges in CO2, CO2 weighted by mass, mass, and stage
+```{r}
+#Larva CO2: Change over time
+dataBEUZ=subset(data, stage=="L")
+dataBEUZ=subset(dataBEUZ, treat=="1"|treat=="2")
+ggplot(data=dataBEUZ,aes(x=day,y=co2_hourly))+
+  geom_smooth()+
+  facet_grid(treat~strain)+
+  geom_point()+
+  theme_classic()+
+  ggtitle("Change in CO2 Production")+
+  ylab("CO2")+xlab("Day")
 
-##Larvae Changes in CO2 and CO2 Weighted by Mass Over Time
+ggplot(data=dataBEUZ,aes(x=day,y=co2_hourly))+
+  geom_smooth()+
+  facet_wrap(~treat)+
+  geom_point()+
+  theme_classic()+
+  ggtitle("Change in CO2 Production")+
+  ylab("CO2")+xlab("Day")
+
+#Larva CO2 by Mass: Change over time
+dataBEUZcm=subset(data, stage=="L")
+dataBEUZcm=subset(dataBEUZcm, treat=="1"|treat=="2")
+ggplot(data=dataBEUZcm,aes(x=day,y=co2_hourly_mass))+
+  geom_smooth()+
+  facet_grid(treat~strain)+
+  geom_point()+
+  theme_classic()+
+  ggtitle("Change in CO2 Production Weighted by Mass")+
+  ylab("CO2 x Mass")+xlab("Day")
+
+ggplot(data=dataBEUZcm,aes(x=day,y=co2_hourly_mass))+
+  geom_smooth()+
+  facet_wrap(~treat)+
+  geom_point()+
+  theme_classic()+
+  ggtitle("Change in CO2 Production Weighted by Mass")+
+  ylab("CO2 x Mass")+xlab("Day")
+
+#Larva MASS: Change Over Time
+dataBEUZm=data
+dataBEUZm=subset(dataBEUZm, stage=="L")
+dataBEUZm=subset(dataBEUZm, treat=="1"|treat=="2")
+ggplot(data=dataBEUZm,aes(x=day,y=mass))+
+  geom_line(aes(group=syringe,color=syringe))+
+  facet_grid(treat~strain)+
+  geom_smooth()+
+  theme_classic()+
+  ggtitle("Larvae Mass Increase")+
+  ylab("Mass")+xlab("Day")
+
+
+ggplot(dataBEUZm, aes(x=day,color=mass))+
+  geom_density(aes(fill=treat),alpha=.3)+
+  facet_grid(treat~strain, scales ="free_y")+
+  scale_x_continuous(breaks=pretty(dataBEUZm$day, n=25))+ 
+  ggtitle("Mass")
+
+ggplot(dataBEUZm, aes(x=day,color=mass))+
+  geom_density(aes(fill=treat),alpha=.3)+
+  facet_wrap(~treat)+
+  scale_x_continuous(breaks=pretty(dataBEUZm$day, n=25))+ 
+  ggtitle("Mass")
+
+##BE Rep 1##
+dataBEUZp=data
+dataBEUZp=subset(dataBEUZp,stage=="L"|stage=="P")
+dataBEUZp=subset(dataBEUZp, treat=="1"|treat=="2")
+#dataBEr1p=subset(dataBEr1p, treat=="2")
+dataBEr1p=subset(dataBEUZp, day<=30)
+#Stages: Change Over Time
+
+ggplot(dataBEUZp, aes(x=day, fill=stage))+
+  theme_classic()+
+  geom_histogram(binwidth=.5, alpha=.5, position="identity")+
+  scale_x_discrete(limits=c(1,2,3,4,5,6,7,8,9,10,11,13,15,17))+
+  ggtitle("Stages")+
+  ylab("# of Insects in each stage")+xlab("Day")
+
+
+ggplot(dataBEUZp, aes(x=day, fill=stage))+
+  geom_density(alpha=.3)+   
+  facet_grid(treat~strain, scales ="free_y")+
+  ggtitle("Stages")
+
+ggplot(dataBEUZp, aes(x=day, fill=stage))+
+  geom_density(alpha=.3)+
+  facet_wrap(~treat)
+  ggtitle("Stages")
+```
+##BE Rep 1: Changes in CO2, CO2 Weighted by Mass, Mass, and Stage, across time
 ```{r} 
 ##################
 #### BE REP 1 ####
@@ -93,6 +183,7 @@ ggplot(data=dataBEr1co2m,aes(x=day,y=co2_hourly_mass))+
 
 #Larva MASS: Change Over Time
 dataBEr1m=dataBEr1s
+dataBEr1m=subset(dataBEr1m, stage=="L")
 ggplot(data=dataBEr1m,aes(x=day,y=mass))+
   geom_line(aes(group=syringe,color=syringe))+
   facet_grid(treat~start)+
@@ -101,22 +192,29 @@ ggplot(data=dataBEr1m,aes(x=day,y=mass))+
   ggtitle("BE Rep1 Larvae Mass Increase")+
   ylab("Mass")+xlab("Day")
 
+ggplot(dataBEr1m, aes(x=day,color=mass))+
+  geom_density(aes(fill=treat),alpha=.3)+
+  facet_grid(treat~start)+
+  scale_x_continuous(breaks=pretty(dataBEr1m$day, n=25))+ 
+  ggtitle("BE Rep1 Mass")
+
 ##BE Rep 1##
 dataBEr1p=subset(dataBEr1s,stage=="L"|stage=="P")
-dataBEr1p=subset(dataBEr1p, treat=="2")
+#dataBEr1p=subset(dataBEr1p, treat=="2")
 dataBEr1p=subset(dataBEr1p, day<=30)
 #Stages: Change Over Time
-
-ggplot(dataBEr1p, aes(x=day, fill=stage))+
-  geom_density(alpha=.3)+
-  ggtitle("BE Non Diapause Rep1 Stages")
 
 ggplot(dataBEr1p, aes(x=day, fill=stage))+
   theme_classic()+
   geom_histogram(binwidth=.5, alpha=.5, position="identity")+
   scale_x_discrete(limits=c(1,2,3,4,5,6,7,8,9,10,11,13,15,17))+
-  ggtitle("BE Non Diapause Rep1 Stages")+
+  ggtitle("BE Rep1 Stages")+
   ylab("# of Insects in each stage")+xlab("Day")
+
+ggplot(dataBEr1p, aes(x=day, fill=stage))+
+  geom_density(alpha=.3)+   
+  facet_grid(treat~start)+
+  ggtitle("BE Rep1 Stages")
 ```
 
 ##BE Rep1 Stats
@@ -152,7 +250,7 @@ anova(fit2,fit3) #fit3
 anova(fit2,fit4) #fit4
 anova(fit3,fit4) #fit4
 ```
-
+##BE Rep 2: Changes in CO2, CO2 Weighted by Mass, Mass, and Stage, across time
 ```{r}
 ##################
 #### BE REP 2 ####
@@ -182,6 +280,7 @@ ggplot(data=dataBEr2co2m,aes(x=day,y=co2_hourly_mass))+
 
 #Larva MASS: Change Over Time
 dataBEr2m=dataBEr2s
+dataBEr2m=subset(dataBEr2m, stage=="L")
 ggplot(data=dataBEr2m,aes(x=day,y=mass))+
   geom_line(aes(group=syringe,color=syringe))+
   facet_grid(treat~start)+
@@ -190,18 +289,22 @@ ggplot(data=dataBEr2m,aes(x=day,y=mass))+
   ggtitle("BE Rep2 Larvae Mass Increase")+
   ylab("Mass")+xlab("Day")
 
-
+ggplot(dataBEr2m, aes(x=day,color=mass))+
+  geom_density(aes(fill=treat),alpha=.3)+
+  facet_grid(treat~start)+
+  scale_x_continuous(breaks=pretty(dataBEr2m$day, n=25))+ 
+  ggtitle("BE Non Diapause Rep1 Stages")
 
 ##BE Rep 2##
 dataBEr2p=subset(dataBEr2s,stage=="L"|stage=="P")
-dataBEr2p=subset(dataBEr2p, treat=="2")
+#dataBEr2p=subset(dataBEr2p, treat=="2")
 dataBEr2p=subset(dataBEr2p, day<=20)
 #Stages: Change Over Time
 
 ggplot(dataBEr2p, aes(x=day, fill=stage))+
   geom_density(alpha=.3)+
+  facet_grid(treat~start)+
   ggtitle("BE Non Diapause Rep2 Stages")
-
 
 
 ggplot(dataBEr2p, aes(x=day, fill=stage))+
@@ -211,7 +314,7 @@ ggplot(dataBEr2p, aes(x=day, fill=stage))+
   ggtitle("BE Non Diapause Rep2 Stages")+
   ylab("# of Insects in each stage")+xlab("Day")
 ```
-
+##UZ Rep 1: Changes in CO2, CO2 Weighted by Mass, Mass, and Stage, across time
 ```{r}
 ##################
 #### UZ REP 1 ####
@@ -240,7 +343,8 @@ ggplot(data=dataUZr1co2m,aes(x=day,y=co2_hourly_mass))+
 
 
 #Larva MASS: Change Over Time
-dataUZr1m=dataUZr1s???
+dataUZr1m=dataUZr1s
+dataUZr1m=subset(dataUZr1m, stage=="L")
 ggplot(data=dataUZr1m,aes(x=day,y=mass))+
   geom_line(aes(group=syringe,color=syringe))+
   facet_grid(treat~start)+
@@ -249,16 +353,24 @@ ggplot(data=dataUZr1m,aes(x=day,y=mass))+
   ggtitle("UZ Rep1 Larvae Mass Increase")+
   ylab("Mass")+xlab("Day")
 
+ggplot(dataUZr1m, aes(x=day,color=mass))+
+  geom_density(aes(fill=treat),alpha=.3)+
+  facet_grid(treat~start)+
+  scale_x_continuous(breaks=pretty(dataUZr1m$day, n=25))+ 
+  ggtitle("UZ Rep1 Stages")
+
+
 
 ##UZ Rep 1##
 dataUZr1p=subset(dataUZr1s,stage=="L"|stage=="P")
-dataUZr1p=subset(dataUZr1p, treat=="2")
+#dataUZr1p=subset(dataUZr1p, treat=="2")
 dataUZr1p=subset(dataUZr1p, day<=20)
 #Stages: Change Over Time
 
 ggplot(dataUZr1p, aes(x=day, fill=stage))+
   geom_density(alpha=.3)+
-  ggtitle("uz Non Diapause Rep1 Stages")
+  facet_grid(treat~start)+
+  ggtitle("UZ Rep1 Stages")
 
 ggplot(dataUZr1p, aes(x=day, fill=stage))+
   theme_classic()+
