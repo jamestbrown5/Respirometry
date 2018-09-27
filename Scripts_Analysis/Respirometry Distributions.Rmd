@@ -40,7 +40,6 @@ data$syringe=as.character(data$syringe) #Set "syringe" as a character
 data$strain<-as.factor(data$strain) #set strain as ind var
 data$treat<-as.factor(data$treat) #set treat as factor as ind var
 ````
-
 ##Dataframe Setup
 ````{r}
 ##########################################
@@ -165,7 +164,7 @@ ggplot(dataBEUZp, aes(x=day, fill=stage))+
 dataBEr1co2=subset(dataBEr1s, stage=="L")
 ggplot(data=dataBEr1co2,aes(x=day,y=co2_hourly))+
   geom_smooth()+
-  facet_grid(treat~start)+
+  facet_grid(treat~start, scales ="free_y")+
   geom_point()+
   theme_classic()+
   ggtitle("BE Rep1 Change in CO2 Production")+
@@ -175,7 +174,7 @@ ggplot(data=dataBEr1co2,aes(x=day,y=co2_hourly))+
 dataBEr1co2m=subset(dataBEr1s, stage=="L")
 ggplot(data=dataBEr1co2m,aes(x=day,y=co2_hourly_mass))+
   geom_smooth()+
-  facet_grid(treat~start)+
+  facet_grid(treat~start, scales ="free_y")+
   geom_point()+
   theme_classic()+
   ggtitle("BE Rep1 Change in CO2 Production Weighted by Mass")+
@@ -186,7 +185,7 @@ dataBEr1m=dataBEr1s
 dataBEr1m=subset(dataBEr1m, stage=="L")
 ggplot(data=dataBEr1m,aes(x=day,y=mass))+
   geom_line(aes(group=syringe,color=syringe))+
-  facet_grid(treat~start)+
+  facet_grid(treat~start, scales ="free_y")+
   geom_smooth()+
   theme_classic()+
   ggtitle("BE Rep1 Larvae Mass Increase")+
@@ -194,7 +193,7 @@ ggplot(data=dataBEr1m,aes(x=day,y=mass))+
 
 ggplot(dataBEr1m, aes(x=day,color=mass))+
   geom_density(aes(fill=treat),alpha=.3)+
-  facet_grid(treat~start)+
+  facet_grid(treat~start, scales ="free_y")+
   scale_x_continuous(breaks=pretty(dataBEr1m$day, n=25))+ 
   ggtitle("BE Rep1 Mass")
 
@@ -213,7 +212,7 @@ ggplot(dataBEr1p, aes(x=day, fill=stage))+
 
 ggplot(dataBEr1p, aes(x=day, fill=stage))+
   geom_density(alpha=.3)+   
-  facet_grid(treat~start)+
+  facet_grid(treat~start, scales ="free_y")+
   ggtitle("BE Rep1 Stages")
 ```
 
@@ -260,7 +259,7 @@ anova(fit3,fit4) #fit4
 dataBEr2co2=subset(dataBEr2s, stage=="L")
 ggplot(data=dataBEr2co2,aes(x=day,y=co2_hourly))+
   geom_smooth()+
-  facet_grid(treat~start)+
+  facet_grid(treat~start, scales ="free_y")+
   geom_point()+
   theme_classic()+
   ggtitle("BE Rep2 Change in CO2 Production")+
@@ -271,7 +270,7 @@ ggplot(data=dataBEr2co2,aes(x=day,y=co2_hourly))+
 dataBEr2co2m=subset(dataBEr2s, stage=="L")
 ggplot(data=dataBEr2co2m,aes(x=day,y=co2_hourly_mass))+
   geom_smooth()+
-  facet_grid(treat~start)+
+  facet_grid(treat~start, scales ="free_y")+
   geom_point()+
   theme_classic()+
   ggtitle("BE Rep2 Change in CO2 Production Weighted by Mass")+
@@ -283,7 +282,7 @@ dataBEr2m=dataBEr2s
 dataBEr2m=subset(dataBEr2m, stage=="L")
 ggplot(data=dataBEr2m,aes(x=day,y=mass))+
   geom_line(aes(group=syringe,color=syringe))+
-  facet_grid(treat~start)+
+  facet_grid(treat~start, scales ="free_y")+
   geom_smooth()+
   theme_classic()+
   ggtitle("BE Rep2 Larvae Mass Increase")+
@@ -291,7 +290,7 @@ ggplot(data=dataBEr2m,aes(x=day,y=mass))+
 
 ggplot(dataBEr2m, aes(x=day,color=mass))+
   geom_density(aes(fill=treat),alpha=.3)+
-  facet_grid(treat~start)+
+  facet_grid(treat~start, scales ="free_y")+
   scale_x_continuous(breaks=pretty(dataBEr2m$day, n=25))+ 
   ggtitle("BE Non Diapause Rep1 Stages")
 
@@ -303,7 +302,7 @@ dataBEr2p=subset(dataBEr2p, day<=20)
 
 ggplot(dataBEr2p, aes(x=day, fill=stage))+
   geom_density(alpha=.3)+
-  facet_grid(treat~start)+
+  facet_grid(treat~start, scales ="free_y")+
   ggtitle("BE Non Diapause Rep2 Stages")
 
 
@@ -324,7 +323,7 @@ ggplot(dataBEr2p, aes(x=day, fill=stage))+
 dataUZr1co2=subset(dataUZr1s, stage=="L")
 ggplot(data=dataUZr1co2,aes(x=day,y=co2_hourly))+
   geom_smooth()+
-  facet_grid(treat~start)+
+  facet_grid(treat~start, scales ="free_y")+
   geom_point()+
   theme_classic()+
   ggtitle("UZ Rep1 Change in CO2 Production")+
@@ -347,7 +346,7 @@ dataUZr1m=dataUZr1s
 dataUZr1m=subset(dataUZr1m, stage=="L")
 ggplot(data=dataUZr1m,aes(x=day,y=mass))+
   geom_line(aes(group=syringe,color=syringe))+
-  facet_grid(treat~start)+
+  facet_grid(treat~start, scales ="free_y")+
   geom_smooth()+
   theme_classic()+
   ggtitle("UZ Rep1 Larvae Mass Increase")+
@@ -355,7 +354,7 @@ ggplot(data=dataUZr1m,aes(x=day,y=mass))+
 
 ggplot(dataUZr1m, aes(x=day,color=mass))+
   geom_density(aes(fill=treat),alpha=.3)+
-  facet_grid(treat~start)+
+  facet_grid(treat~start, scales ="free_y")+
   scale_x_continuous(breaks=pretty(dataUZr1m$day, n=25))+ 
   ggtitle("UZ Rep1 Stages")
 
@@ -369,7 +368,7 @@ dataUZr1p=subset(dataUZr1p, day<=20)
 
 ggplot(dataUZr1p, aes(x=day, fill=stage))+
   geom_density(alpha=.3)+
-  facet_grid(treat~start)+
+  facet_grid(treat~start, scales ="free_y")+
   ggtitle("UZ Rep1 Stages")
 
 ggplot(dataUZr1p, aes(x=day, fill=stage))+
