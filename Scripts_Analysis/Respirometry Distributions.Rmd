@@ -26,12 +26,12 @@ library(plyr)
 
 #############--------------Read in the data-----------------######################
 #PC
-setwd("/Users/jbrown/Documents/GitHub/Respirometry/Data")
-data=read_excel("Respir.xlsx")
+#setwd("/Users/jbrown/Documents/GitHub/Respirometry/Data")
+#data=read_excel("Respir.xlsx")
 
 
 #MAC
-#data=read_excel("/Users/JamesB/Google Drive/Graduate School/Self_JamesTBrown/GitHub/Respirometry/Data/Respir.xlsx", sheet = "Sheet1")
+data=read_excel("/Users/JamesB/Google Drive/Graduate School/Self_JamesTBrown/GitHub/Respirometry/Data/Respir.xlsx", sheet = "Sheet1")
 
 ############## Data Prep ###################
 data=subset(data, VCO2!="NA") # Remove NAs from df
@@ -117,7 +117,7 @@ ggplot(data=dataBEUZm,aes(x=day,y=mass))+
 
 
 ggplot(dataBEUZm, aes(x=day,color=mass))+
-  geom_density(aes(fill=treat),alpha=.3)+
+  geom_histogram(aes(fill=treat),alpha=.3)+
   facet_grid(treat~strain, scales ="free_y")+
   scale_x_continuous(breaks=pretty(dataBEUZm$day, n=25))+ 
   ggtitle("Mass")
