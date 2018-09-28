@@ -26,12 +26,12 @@ library(plyr)
 
 #############--------------Read in the data-----------------######################
 #PC
-setwd("/Users/jbrown/Documents/GitHub/Respirometry/Data")
-data=read_excel("Respir.xlsx")
+#setwd("/Users/jbrown/Documents/GitHub/Respirometry/Data")
+#data=read_excel("Respir.xlsx")
 
 
 #MAC
-#data=read_excel("/Users/JamesB/Google Drive/Graduate School/Self_JamesTBrown/GitHub/Respirometry/Data/Respir.xlsx", sheet = "Sheet1")
+data=read_excel("/Users/JamesB/Google Drive/Graduate School/Self_JamesTBrown/GitHub/Respirometry/Data/Respir.xlsx", sheet = "Sheet1")
 
 ############## Data Prep ###################
 data=subset(data, VCO2!="NA") # Remove NAs from df
@@ -152,8 +152,7 @@ ggplot(data=dataBEUZm,aes(x=day,y=mass, color=strain,group=strain))+
   stat_summary(fun.y=mean, geom="line")+
   facet_grid(strain~treat)+
   stat_summary(fun.data=mean_se, geom="errorbar", width=0.05) +
-  theme_classic()+
-  ggtitle("Change in  Mass")+
+  theme_classic()
   ylab("CO2 x Mass")+xlab("Day")
 
 ggplot(data=dataBEUZm,aes(x=day,y=mass))+
