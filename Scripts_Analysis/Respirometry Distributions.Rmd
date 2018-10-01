@@ -30,6 +30,13 @@ library(ggpmisc)
 #setwd("/Users/jbrown/Documents/GitHub/Respirometry/Data")
 #data=read_excel("Respir.xlsx")
 
+data=read_excel("/Users/JamesB/Google Drive/Graduate School/Self_JamesTBrown/GitHub/Rearing/Data/respir_pupa data.xlsx", sheet = "Sheet1")
+str(data)
+data$treat<-as.factor(data$treatment)
+ggplot(data,aes(x=day,color=strain,fill=strain))+
+  geom_histogram()+
+  facet_grid(strain~treat)
+
 
 #MAC
 data=read_excel("/Users/JamesB/Google Drive/Graduate School/Self_JamesTBrown/GitHub/Respirometry/Data/Respir.xlsx", sheet = "Sheet1")
@@ -67,20 +74,10 @@ dataUZr1s=data #subset of main df into UZ rep 1
 dataUZr1s=subset(dataUZr1s, treat=="1" | treat=="2")
 dataUZr1s=subset(dataUZr1s, Tray=="16,23 1228" | Tray=="12,23 1228")
 
-datapupa=subset(data,treat=="1"|treat=="2")
-datapupa=subset(datapupa,stage=="L"|stage=="P")
-datapupa=subset(datapupa,Tray!="12,23 1201-01")
-datapupa=subset(datapupa,Tray!="12,23 1201-02")
-datapupa=subset(datapupa,Tray!="16,23 1202")
-datapupa=subset(datapupa,Tray!="16,23 1201")
-ggplot(datapupa,aes(x=day,colour=stage,fill=stage))+
-  geom_bar(stat = "count")+
-  theme_classic()+
-  facet_grid(strain~treat,scales="free_y")+
-  ggtitle("Stages")+
-  ylab("# of Insects in each stage")+xlab("Day")
 `````
+```{r}
 
+```
 ## Treatment comparison of chainges in CO2 BE rep 2 and UZ rep 1 with analysis
 ```{r}
 #Larva CO2: Change over time
