@@ -30,13 +30,17 @@ library(ggpmisc)
 #setwd("/Users/jbrown/Documents/GitHub/Respirometry/Data")
 #data=read_excel("Respir.xlsx")
 
-data=read_excel("/Users/JamesB/Google Drive/Graduate School/Self_JamesTBrown/GitHub/Rearing/Data/respir_pupa data.xlsx", sheet = "Sheet1")
-str(data)
-data$treat<-as.factor(data$treatment)
-ggplot(data,aes(x=day,color=strain,fill=strain))+
-  geom_histogram()+
-  facet_grid(strain~treat)
+#data=read_excel("/Users/JamesB/Google Drive/Graduate School/Self_JamesTBrown/GitHub/Rearing/Data/respir_pupa data.xlsx", sheet = "Sheet1")
+#str(data)
+#data$treat<-as.factor(data$treatment)
+#ggplot(data,aes(x=day,color=strain,fill=strain))+
+#  geom_histogram()+
+#  facet_grid(strain~treat)
 
+#ggplot(data, aes(x=day))+
+#  geom_density(alpha=.3)+
+#  facet_wrap(treat~strain)+
+#  ggtitle("Stages")
 
 #MAC
 data=read_excel("/Users/JamesB/Google Drive/Graduate School/Self_JamesTBrown/GitHub/Respirometry/Data/Respir.xlsx", sheet = "Sheet1")
@@ -47,10 +51,105 @@ data=subset(data, syringe!="Blank Control") #Removing "Blank Control" syringes
 data$syringe=as.character(data$syringe) #Set "syringe" as a character
 data$strain<-as.factor(data$strain) #set strain as ind var
 data$treat<-as.factor(data$treat) #set treat as factor as ind var
-data$day<-as.factor(data$day)
+#data$day<-as.factor(data$day)
 data$stage<-as.factor(data$stage)
 str(data)
 ````
+## BE & UZ reps
+```{r}
+##BE Rep 1##
+dataBEUZp=data
+dataBEUZp=subset(dataBEUZp,stage=="L"|stage=="P")
+dataBEUZp=subset(dataBEUZp, treat=="1"|treat=="2")
+dataBEUZp=subset(dataBEUZp, Tray!="12,23 1201-01")
+dataBEUZp=subset(dataBEUZp, Tray!="12,23 1201-02")
+dataBEUZp=subset(dataBEUZp, Tray!="16,23 1202")
+dataBEUZp=subset(dataBEUZp,Tray!="16,23 1201")
+#dataBEr1p=subset(dataBEr1p, treat=="2")
+#dataBEr1p=subset(dataBEUZp, day<=30)
+#Stages: Change Over Time
+
+dataBEUZp=subset(dataBEUZp,strain=="BE")
+ggplot(dataBEUZp, aes(x=day, fill=stage))+
+  theme_classic()+
+  geom_histogram(binwidth=.5, alpha=.5, position="dodge")+
+  ggtitle("Stages")+
+  scale_x_continuous(breaks=pretty(dataBEUZp$day, n=43))+ 
+  facet_grid(treat~strain, scales ="free_y")+
+  ylab("# of Insects in each stage")+xlab("Day")
+
+
+ggplot(dataBEUZp, aes(x=day, fill=stage))+
+  geom_density(alpha=.3)+   
+  facet_grid(treat~strain, scales ="free_y")+
+  ggtitle("Stages")
+
+ggplot(dataBEUZ, aes(x=day, fill=stage))+
+  geom_density(alpha=.3)+
+  facet_wrap(~treat,scales="free_y")+
+  ggtitle("Stages")
+```
+## comparison between definite diapausing BE's and the UZ's in diapause conditions
+```{r}
+dataBEpupa=subset(dataBEUZp,Tray=="12,23 0208")
+dataBEpupa=subset(dataBEpupa,strain=="BE")
+dataBEpupa=subset(dataBEpupa,syringe!="51")
+dataBEpupa=subset(dataBEpupa,syringe!="56")
+dataBEpupa=subset(dataBEpupa,syringe!="62")
+dataBEpupa=subset(dataBEpupa,syringe!="64")
+dataBEpupa=subset(dataBEpupa,syringe!="68")
+dataBEpupa=subset(dataBEpupa,syringe!="69")
+dataBEpupa=subset(dataBEpupa,syringe!="75")
+dataBEpupa=subset(dataBEpupa,co2_hourly!="NA")
+dataBEres=subset(dataBEUZp,Tray=="12,23 0208")
+dataBEres=subset(dataBEres,syringe=="51"|syringe=="56"|syringe=="62"|syringe=="64"|syringe=="68"|syringe=="69"|syringe=="75")
+dataBEUZres=dataBEUZp
+
+diap_notprog=rbind(dataBEUZres,dataBEpupa)
+
+ggplot(data=diap_notprog,aes(x=day,y=co2_hourly_mass,group=strain,color=strain))+
+  stat_summary(fun.y=mean, geom="line")+
+  scale_color_manual(values=c(UZ="purple",BE="orange"))+
+  stat_summary(fun.data=mean_se, geom="errorbar", width=0.05) +
+  theme_classic()+
+  facet_wrap(~treat)+
+  scale_x_continuous(breaks=pretty(diap_notprog$day, n=30))+
+  ggtitle("Change in CO2 x Mass Production Early Termination BE larvae")+
+  ylab("CO2")+xlab("Day")
+
+defdiap=rbind(dataBEres,dataBEUZres)
+
+ggplot(data=defdiap,aes(x=day,y=co2_hourly_mass,group=strain,color=strain))+
+  stat_summary(fun.y=mean, geom="line")+
+  scale_color_manual(values=c(UZ="purple",BE="orange"))+
+  stat_summary(fun.data=mean_se, geom="errorbar", width=0.05) +
+  theme_classic()+
+  facet_wrap(~treat)+
+  scale_x_continuous(breaks=pretty(defdiap$day, n=30))+
+  ggtitle("Change in CO2 x Mass Production True Diapausing BE Larvae")+
+  ylab("CO2")+xlab("Day")
+
+
+ggplot(data=dataBEUZp,aes(x=day,y=co2_hourly_mass,group=strain,color=strain))+
+  stat_summary(fun.y=mean, geom="line")+
+  scale_color_manual(values=c(UZ="purple",BE="orange"))+
+  stat_summary(fun.data=mean_se, geom="errorbar", width=0.05) +
+  theme_classic()+
+  facet_wrap(~treat)+
+  scale_x_continuous(breaks=pretty(defdiap$day, n=30))+
+  ggtitle("Change in CO2 x Mass Production w/o Separation")+
+  ylab("CO2")+xlab("Day")
+
+modnotrpog=lmer(co2_hourly_mass~strain*treat+(1|day),diap_notprog)
+moddefdiap=lmer(co2_hourly_mass~strain*treat+(1|day),defdiap)
+modall=lmer(co2_hourly_mass~strain*treat+(1|day),dataBEUZp)
+summary(modnotrpog)
+summary(moddefdiap)
+summary(modall)
+
+
+```
+
 ##Dataframe Setup
 ````{r}
 ##########################################
@@ -73,10 +172,6 @@ dataBEr2s=subset(dataBEr2s, Tray=="16,23 0208" | Tray=="12,23 0208")
 dataUZr1s=data #subset of main df into UZ rep 1
 dataUZr1s=subset(dataUZr1s, treat=="1" | treat=="2")
 dataUZr1s=subset(dataUZr1s, Tray=="16,23 1228" | Tray=="12,23 1228")
-
-`````
-```{r}
-
 ```
 ## Treatment comparison of chainges in CO2 BE rep 2 and UZ rep 1 with analysis
 ```{r}
@@ -519,33 +614,7 @@ ggplot(dataBEUZm, aes(x=day,color=mass))+
   scale_x_continuous(breaks=pretty(dataBEUZm$day, n=25))+ 
   ggtitle("Mass")
 ```
-## BE Rep 1
-```{r}
-##BE Rep 1##
-dataBEUZp=data
-dataBEUZp=subset(dataBEUZp,stage=="L"|stage=="P")
-dataBEUZp=subset(dataBEUZp, treat=="1"|treat=="2")
-#dataBEr1p=subset(dataBEr1p, treat=="2")
-dataBEr1p=subset(dataBEUZp, day<=30)
-#Stages: Change Over Time
 
-ggplot(dataBEUZp, aes(x=day, fill=stage))+
-  theme_classic()+
-  geom_histogram(binwidth=.5, alpha=.5, position="identity")+
-  scale_x_discrete(limits=c(1,2,3,4,5,6,7,8,9,10,11,13,15,17))+
-  ggtitle("Stages")+
-  ylab("# of Insects in each stage")+xlab("Day")
-
-
-ggplot(dataBEUZp, aes(x=day, fill=stage))+
-  geom_density(alpha=.3)+   
-  facet_grid(treat~strain, scales ="free_y")+
-  ggtitle("Stages")
-
-ggplot(dataBEUZp, aes(x=day, fill=stage))+
-  geom_density(alpha=.3)+
-  facet_wrap(~treat)
-  ggtitle("Stages")
 ```
 
 ##BE Rep 1: Changes in CO2, CO2 Weighted by Mass, Mass, and Stage, across time
