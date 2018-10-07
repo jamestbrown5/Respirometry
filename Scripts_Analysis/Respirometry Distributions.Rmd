@@ -23,12 +23,11 @@ library(tidyr)
 library(MASS)
 library(doBy)
 library(plyr)
-library(ggpmisc)
 
 #############--------------Read in the data-----------------######################
 #PC
-#setwd("/Users/jbrown/Documents/GitHub/Respirometry/Data")
-#data=read_excel("Respir.xlsx")
+setwd("/Users/jbrown/Documents/GitHub/Respirometry/Data")
+data=read_excel("Respir.xlsx")
 
 #data=read_excel("/Users/JamesB/Google Drive/Graduate School/Self_JamesTBrown/GitHub/Rearing/Data/respir_pupa data.xlsx", sheet = "Sheet1")
 #str(data)
@@ -43,7 +42,7 @@ library(ggpmisc)
 #  ggtitle("Stages")
 
 #MAC
-data=read_excel("/Users/JamesB/Google Drive/Graduate School/Self_JamesTBrown/GitHub/Respirometry/Data/Respir.xlsx", sheet = "Sheet1")
+#data=read_excel("/Users/JamesB/Google Drive/Graduate School/Self_JamesTBrown/GitHub/Respirometry/Data/Respir.xlsx", sheet = "Sheet1")
 
 ############## Data Prep ###################
 data=subset(data, VCO2!="NA") # Remove NAs from df
@@ -71,13 +70,12 @@ dataBEUZp=subset(dataBEUZp,Tray!="16,23 1201")
 
 dataBEUZp=subset(dataBEUZp,strain=="BE")
 ggplot(dataBEUZp, aes(x=day, fill=stage))+
-  theme_classic()+
   geom_histogram(binwidth=.5, alpha=.5, position="dodge")+
   ggtitle("Stages")+
   scale_x_continuous(breaks=pretty(dataBEUZp$day, n=43))+ 
   facet_grid(treat~strain, scales ="free_y")+
   ylab("# of Insects in each stage")+xlab("Day")
-
+summary(dataBEUZp)
 
 ggplot(dataBEUZp, aes(x=day, fill=stage))+
   geom_density(alpha=.3)+   
