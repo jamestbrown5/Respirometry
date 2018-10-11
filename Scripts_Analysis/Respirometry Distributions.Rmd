@@ -26,8 +26,8 @@ library(plyr)
 
 #############--------------Read in the data-----------------######################
 #PC
-setwd("/Users/jbrown/Documents/GitHub/Respirometry/Data")
-data=read_excel("Respir.xlsx")
+#setwd("/Users/jbrown/Documents/GitHub/Respirometry/Data")
+#data=read_excel("Respir.xlsx")
 
 #data=read_excel("/Users/JamesB/Google Drive/Graduate School/Self_JamesTBrown/GitHub/Rearing/Data/respir_pupa data.xlsx", sheet = "Sheet1")
 #str(data)
@@ -42,7 +42,7 @@ data=read_excel("Respir.xlsx")
 #  ggtitle("Stages")
 
 #MAC
-#data=read_excel("/Users/JamesB/Google Drive/Graduate School/Self_JamesTBrown/GitHub/Respirometry/Data/Respir.xlsx", sheet = "Sheet1")
+data=read_excel("/Users/JamesB/Google Drive/Graduate School/Self_JamesTBrown/GitHub/Respirometry/Data/Respir.xlsx", sheet = "Sheet1")
 
 ############## Data Prep ###################
 data=subset(data, VCO2!="NA") # Remove NAs from df
@@ -75,14 +75,13 @@ ggplot(dataBEUZp, aes(x=day, fill=stage))+
   scale_x_continuous(breaks=pretty(dataBEUZp$day, n=43))+ 
   facet_grid(treat~strain, scales ="free_y")+
   ylab("# of Insects in each stage")+xlab("Day")
-summary(dataBEUZp)
 
 ggplot(dataBEUZp, aes(x=day, fill=stage))+
   geom_density(alpha=.3)+   
   facet_grid(treat~strain, scales ="free_y")+
   ggtitle("Stages")
 
-ggplot(dataBEUZ, aes(x=day, fill=stage))+
+ggplot(data, aes(x=day, fill=stage))+
   geom_density(alpha=.3)+
   facet_wrap(~treat,scales="free_y")+
   ggtitle("Stages")
@@ -544,7 +543,9 @@ dataNDia=subset(dataBEUZcm,treat=="2")
 modco2mnd=lmer(co2_hourly_mass~strain + (1|day),data=dataNDia)
 summary(modco2mnd)
 
-
+dataUZUZUZ=subset(data,strain=="UZ")
+dataUZUZUZ=subset(dataUZUZUZ,treat=="1")
+dataUZUZUZ$term="UZ"
 dataBEpupa=subset(data,Tray=="12,23 0208")
 dataBEpupa=subset(dataBEpupa,strain=="BE")
 dataBEres=subset(data,Tray=="12,23 0208")
@@ -556,13 +557,21 @@ dataBEres$term="late"
 
 
 massdiff=rbind(dataBEpupa,dataBEres)
+massdiff=rbind(dataUZUZUZ,massdiff)
 massdiff=subset(massdiff,co2_min_mass!="NA")
 
 ggplot(data=massdiff,aes(x=day,y=mass,group=term,color=term))+
   stat_summary(fun.y=mean, geom="line",shape=18)+
   stat_summary(fun.data=mean_se, geom="errorbar", width=0.05) +
   theme_bw()+
-  ggtitle("Early vs Late Terminators")+
+  ggtitle("Early vs Non Terminators")+
+  ylab("Mass")+xlab("Day")
+
+ggplot(data=massdiff,aes(x=day,y=co2_min_mass,group=term,color=term))+
+  stat_summary(fun.y=mean, geom="line",shape=18)+
+  stat_summary(fun.data=mean_se, geom="errorbar", width=0.05) +
+  theme_bw()+
+  ggtitle("Early vs Non Terminators")+
   ylab("CO2 x Min x Mass")+xlab("Day")
 
 
@@ -577,15 +586,15 @@ dataBEearly=subset(dataBEpupa,day=="6")
 dataBElate=subset(dataBEres,day=="6")
 Peakmass=rbind(dataBEearly,dataBElate)
 Peakmass=subset(Peakmass,mass!="NA")
-modq=lm(mass~term,data=Peakmass)
+modq=lm(mass~term (1|day),data=Peakmass)
 summary(modq)
 
 plot(modq)
 
-massaov <- with(myData.mean,
-                   aov(stress ~ music * image +
-                       Error(PID / (music * image)))
-)
+#massaov <- with(myData.mean,
+#                  aov(stress ~ music * image +
+#                     Error(PID / (music * image)))
+#)
 
 
 ggplot(data=dataBEpupa,aes(x=day,y=mass))+
