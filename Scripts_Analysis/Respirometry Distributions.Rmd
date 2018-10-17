@@ -507,72 +507,106 @@ dataBEUZcm=subset(data, stage=="L")
 dataBEUZcm=subset(dataBEUZcm,Tray!="12,23 1201-01"|Tray=="12,23 1201-02"|Tray=="16,23 1202"|Tray=="16,23 1201")
 #dataBEUZcm=subset(dataBEUZcm,day<=9)
 dataBEUZcm=subset(dataBEUZcm, treat=="1"|treat=="2")
-ggplot(data=dataBEUZcm,aes(x=day,y=co2_min_mass, color=strain,group=strain))+
+
+ggplot(data=dataBEUZcm,aes(x=day,y=co2_min_mass, color=treat,group=treat))+
   stat_summary(fun.y=mean, geom="line")+
-  facet_grid(strain~treat)+
+  facet_grid(~strain)+
   stat_summary(fun.data=mean_se, geom="errorbar", width=0.05) +
-  theme_classic()+
+  scale_x_continuous(breaks=pretty(dataBEUZcm$day, n=20))+
+  theme_bw()+
   ggtitle("Change in CO2 Production Weighted by Mass")+
   ylab("CO2 x Mass x Hour")+xlab("Day")
 
-ggplot(data=dataBEUZcm,aes(x=day,y=co2_hourly_mass))+
-  geom_smooth()+
-  facet_wrap(~treat)+
-  geom_point()+
-  theme_classic()+
-  ggtitle("Change in CO2 Production Weighted by Mass")+
-  ylab("CO2 x Mass")+xlab("Day")
 
+diaBE=subset(dataBEUZcm,day=="6")
+ndiaBE=subset(dataBE,day=="4")
+dataBE=rbind(diaBE,ndiaBE)
 dataBE=subset(dataBEUZcm,strain=="BE")
 #dataBE=subset(dataBe,day<=10)
-modco2m=lmer(co2_hourly_mass~treat + (1|day),data=dataBE)
-summary(modco2m)
+modco2BE=lmer(co2_min_mass~treat + (1|day),data=dataBE)
+summary(modco2BE)
 
+diaUZ=subset(dataBEUZcm,day=="9")
+ndiaUZ=subset(dataBE,day=="5")
+dataUZ=rbind(diaUZ,ndiaUZ)
 dataUZ=subset(dataBEUZcm,strain=="UZ")
 #dataUZ=subset(dataUZ,day<=10)
-modco2m=lmer(co2_hourly_mass~treat + (1|day),data=dataUZ)
-summary(modco2m)
+modco2UZ=lmer(co2_min_mass~treat + (1|day),data=dataUZ)
+summary(modco2UZ)
 
-dataDia=subset(dataBEUZcm,treat=="1")
-#dataBE=subset(dataBe,day<=10)
-modco2md=lmer(co2_hourly_mass~strain + (1|day),data=dataDia)
-summary(modco2md)
 
-dataNDia=subset(dataBEUZcm,treat=="2")
-#dataUZ=subset(dataUZ,day<=10)
+ggplot(data=dataNDia,aes(x=day,y=mass,group=strain,color=strain))+
+  stat_summary(fun.y=mean, geom="line",shape=18)+
+  stat_summary(fun.data=mean_se, geom="errorbar", width=0.05) +
+  theme_bw()+
+  ggtitle("BE and UZ Non Diapause")+
+  ylab("Mass")+xlab("Day")
 modco2mnd=lmer(co2_hourly_mass~strain + (1|day),data=dataNDia)
 summary(modco2mnd)
+
+
+ggplot(data=dataNDia,aes(x=day,y=co2_min_mass,group=strain,color=strain))+
+  stat_summary(fun.y=mean, geom="line",shape=18)+
+  stat_summary(fun.data=mean_se, geom="errorbar", width=0.05) +
+  theme_bw()+
+  ggtitle("BE and UZ Non Diapause")+
+  ylab("CO2 x Min x Mass")+xlab("Day")
+
+
+
 
 dataUZUZUZ=subset(data,strain=="UZ")
 dataUZUZUZ=subset(dataUZUZUZ,treat=="1")
 dataUZUZUZ$term="UZ"
 dataBEpupa=subset(data,Tray=="12,23 0208")
 dataBEpupa=subset(dataBEpupa,strain=="BE")
+dataBEpupa=subset(dataBEpupa,syringe=="52"|syringe=="53"|syringe=="54"|syringe=="57"|syringe=="59"|syringe=="60"|syringe=="61"|syringe=="63"|syringe=="66"|syringe=="70"|syringe=="71"|syringe=="73"|syringe=="74")
+dataBEpupa$term="Shallow Diapause"
 dataBEres=subset(data,Tray=="12,23 0208")
 dataBEres=subset(dataBEres,strain=="BE")
-dataBEpupa=subset(dataBEres,syringe=="52"|syringe=="53"|syringe=="54"|syringe=="57"|syringe=="59"|syringe=="60"|syringe=="61"|syringe=="63"|syringe=="66"|syringe=="70"|syringe=="71"|syringe=="73"|syringe=="74")
-dataBEpupa$term="early"
 dataBEres=subset(dataBEres,syringe=="51"|syringe=="56"|syringe=="62"|syringe=="64"|syringe=="68"|syringe=="69"|syringe=="75")
-dataBEres$term="late"
+dataBEres$term="Deep Diapause"
 
 
-massdiff=rbind(dataBEpupa,dataBEres)
-massdiff=rbind(dataUZUZUZ,massdiff)
-massdiff=subset(massdiff,co2_min_mass!="NA")
-
-ggplot(data=massdiff,aes(x=day,y=mass,group=term,color=term))+
+ggplot(data=dataUZUZUZ,aes(x=day,y=mass,group=term,color=term))+
   stat_summary(fun.y=mean, geom="line",shape=18)+
   stat_summary(fun.data=mean_se, geom="errorbar", width=0.05) +
   theme_bw()+
   ggtitle("Early vs Non Terminators")+
   ylab("Mass")+xlab("Day")
 
+
+massdiff=rbind(dataBEpupa,dataBEres)
+#massdiff=rbind(dataUZUZUZ,massdiff)
+massdiff=subset(massdiff,co2_min_mass!="NA")
+
+ggplot(data=massdiff,aes(x=day,y=mass,group=term,color=term))+
+  stat_summary(fun.y=mean, geom="line",shape=18)+
+  stat_summary(fun.data=mean_se, geom="errorbar", width=0.05) +
+  theme_bw()+
+  ggtitle("Shallow vs Deep Diapause")+
+  ylab("Mass")+xlab("Day")
+
 ggplot(data=massdiff,aes(x=day,y=co2_min_mass,group=term,color=term))+
   stat_summary(fun.y=mean, geom="line",shape=18)+
   stat_summary(fun.data=mean_se, geom="errorbar", width=0.05) +
   theme_bw()+
-  ggtitle("Early vs Non Terminators")+
+  ggtitle("Shallow vs Deep Diapause")+
   ylab("CO2 x Min x Mass")+xlab("Day")
+
+
+dataBEearly=subset(dataBEpupa,day=="6")
+dataBElate=subset(dataBEres,day=="6")
+dataUZlate=subset(dataUZUZUZ,day=="9")
+Peakmass=rbind(dataBEearly,dataBElate)
+Peakmass=rbind(Peakmass,dataUZlate)
+Peakmass=subset(Peakmass,mass!="NA")
+Peakmass$Tray=as.factor(Peakmass$Tray)
+Peakmass$term=as.factor(Peakmass$term)
+str(Peakmass)
+
+modco2peakm=lmer(co2_min_mass~strain + (1|day),data=Peakmass)
+summary(modco2peakm)
 
 
 #Larva MASS: Change Over Time
@@ -582,14 +616,12 @@ ggplot(data=massdiff,aes(x=day,y=co2_min_mass,group=term,color=term))+
 #dataBEUZm=subset(dataBEUZm, treat=="1"|treat=="2")
 
 
-dataBEearly=subset(dataBEpupa,day=="6")
-dataBElate=subset(dataBEres,day=="6")
-Peakmass=rbind(dataBEearly,dataBElate)
-Peakmass=subset(Peakmass,mass!="NA")
-modq=lm(mass~term (1|day),data=Peakmass)
-summary(modq)
 
-plot(modq)
+#modq=aov(co2_min_mass~term,data=Peakmass)
+#modq=aov(Peakmass, mass~term)
+#summary(modq)
+
+#plot(modq)
 
 #massaov <- with(myData.mean,
 #                  aov(stress ~ music * image +
@@ -630,6 +662,7 @@ dataUZUZ=subset(dataUZUZ,treat=="1")
 ggplot(data=dataBEUZcm,aes(x=day,y=co2_min_mass))+
   stat_summary(fun.y=mean, geom="line")+
   stat_summary(fun.data=mean_se, geom="errorbar", width=0.05) +
+  scale_x_continuous(breaks=pretty(dataBE12$day, n=30))+
   theme_bw()+
   ggtitle("UZ12: Change in CO2 Production Weighted by Mass and Time")+
   ylab("CO2 x Min x Mass")+xlab("Day")
@@ -637,7 +670,8 @@ ggplot(data=dataBEUZcm,aes(x=day,y=co2_min_mass))+
 ggplot(data=dataBEUZcm,aes(x=day,y=mass))+
   stat_summary(fun.y=mean, geom="line")+
   stat_summary(fun.data=mean_se, geom="errorbar", width=0.05) +
-  theme_bw()+
+  scale_x_continuous(breaks=pretty(dataBE12$day, n=30))+
+  theme()+
   ggtitle("UZ12: Mass Peak on Day 10")+
   ylab("Mass")+xlab("Day")
 ```
