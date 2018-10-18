@@ -26,8 +26,8 @@ library(plyr)
 
 #############--------------Read in the data-----------------######################
 #PC
-#setwd("/Users/jbrown/Documents/GitHub/Respirometry/Data")
-#data=read_excel("Respir.xlsx")
+setwd("/Users/jbrown/Documents/GitHub/Respirometry/Data")
+data=read_excel("Respir.xlsx")
 
 #data=read_excel("/Users/JamesB/Google Drive/Graduate School/Self_JamesTBrown/GitHub/Rearing/Data/respir_pupa data.xlsx", sheet = "Sheet1")
 #str(data)
@@ -42,7 +42,7 @@ library(plyr)
 #  ggtitle("Stages")
 
 #MAC
-data=read_excel("/Users/JamesB/Google Drive/Graduate School/Self_JamesTBrown/GitHub/Respirometry/Data/Respir.xlsx", sheet = "Sheet1")
+#data=read_excel("/Users/JamesB/Google Drive/Graduate School/Self_JamesTBrown/GitHub/Respirometry/Data/Respir.xlsx", sheet = "Sheet1")
 
 ############## Data Prep ###################
 data=subset(data, VCO2!="NA") # Remove NAs from df
@@ -605,7 +605,7 @@ Peakmass$Tray=as.factor(Peakmass$Tray)
 Peakmass$term=as.factor(Peakmass$term)
 str(Peakmass)
 
-modco2peakm=lmer(co2_min_mass~strain + (1|day),data=Peakmass)
+modco2peakm=aov(co2_hourly~strain+mass,data=Peakmass)
 summary(modco2peakm)
 
 
