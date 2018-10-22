@@ -325,28 +325,22 @@ dataBEUZmass=subset(dataBEUZmass,Tray!="16,23 1202")
 dataBEUZmass=subset(dataBEUZmass,Tray!="16,23 1201")
 dataBEUZmass12=subset(dataBEUZmass, treat=="1")
 dataBEUZmass16=subset(dataBEUZmass, treat=="2")
-dataUZvUZ=subset(dataBEUZmass, strain=="UZ")
-dataBEvBE=subset(dataBEUZmass, strain=="BE")
-
 
 dataBEUZmass=subset(dataBEUZmass,treat=="1"|treat=="2")
-ggplot(data=dataBEvBE,aes(x=day,y=co2_min_mass,group=treat,color=treat))+
-  stat_summary(fun.y=mean, geom="line",shape=25,size=1)+
-  stat_summary(fun.y=mean, geom="point",shape=19,size=2)+
-  stat_summary(fun.data=mean_se, geom="errorbar", width=0.05,size=1,shape=21) +
-  theme(panel.grid.major = element_line(size=0.5),panel.grid.minor = element_line(size=0))+
-  scale_x_continuous(breaks=pretty(dataBEUZmass$day, n=20))+
-  scale_color_manual(values=c("1"="pink","2"="black"))+
-  ggtitle("Change in CO2 Production Be")+
+ggplot(data=dataBEUZmass,aes(x=day,y=co2_min_mass,color=treat,group=strain))+
+  stat_summary(fun.y=mean, geom="line")+
+  stat_summary(fun.data=mean_se, geom="errorbar", width=0.05) +
+  theme_classic()+
+  scale_x_continuous(breaks=pretty(dataBEUZmass$day, n=30))+
+  ggtitle("Change in Mass Production")+
   ylab("Mass")+xlab("Day")
 
-
-ggplot(data=dataBEUZ16,aes(x=day,y=co2_min_mass,fill=treat,color=treat))+
+ggplot(data=dataBEUZ16,aes(x=day,y=co2_min_mass,color=strain))+
   stat_summary(fun.y=mean, geom="line",shape=25,size=1)+
   stat_summary(fun.y=mean, geom="point",shape=19,size=2)+
   stat_summary(fun.data=mean_se, geom="errorbar", width=0.05,size=1,shape=21) +
   theme(panel.grid.major = element_line(size=0.5),panel.grid.minor = element_line(size=0))+
-  scale_fill_manual(values=c("1"="lightblue","2"="black"))+
+  scale_fill_manual(values=c(UZ="lightblue",BE="lightred"))+
   scale_x_continuous(breaks=pretty(dataBEUZmass12$day, n=30))+
   ggtitle("Change in Mass Production")+
   ylab("Mass")+xlab("Day")
@@ -358,10 +352,10 @@ ggplot(data=dataBEUZ12,aes(x=day,y=co2_min_mass,color=strain))+
   stat_summary(fun.y=mean, geom="point",shape=19,size=2)+
   stat_summary(fun.data=mean_se, geom="errorbar", width=0.05,size=1,shape=21) +
   theme(panel.grid.major = element_line(size=0.5),panel.grid.minor = element_line(size=0))+
-  scale_x_continuous(breaks=pretty(dataBEUZmass$day, n=20))+
-  ggtitle("Change in CO2 Production Be")+
+  scale_fill_manual(values=c(UZ="lightblue",BE="lightred"))+
+  scale_x_continuous(breaks=pretty(dataBEUZmass12$day, n=30))+
+  ggtitle("Change in Mass Production")+
   ylab("Mass")+xlab("Day")
-
 
 datamass16be=subset(dataBEUZmass16,strain=="BE")
 datamass16be=subset(datamass16be,day=="3")
@@ -624,7 +618,7 @@ ggplot(data=massdiff,aes(x=day,y=co2_min_mass,group=term,color=term))+
   ylab("CO2 x Min x Mass")+xlab("Day")
 
 massdiff=subset(massdiff,day=="6")
-modco2peakm=lm(co2_min_mass~term,data=massdiff)
+modco2peakm=aov(co2_min_mass~term,data=massdiff)
 summary(modco2peakm)
 
 
