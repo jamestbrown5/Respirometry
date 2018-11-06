@@ -334,22 +334,33 @@ ggplot(data=dataBEvBE,aes(x=day,y=co2_min_mass,group=treat,color=treat))+
   stat_summary(fun.y=mean, geom="line",shape=25,size=1)+
   stat_summary(fun.y=mean, geom="point",shape=19,size=2)+
   stat_summary(fun.data=mean_se, geom="errorbar", width=0.05,size=1,shape=21) +
-  theme(panel.grid.major = element_line(size=0.5),panel.grid.minor = element_line(size=0))+
-  scale_x_continuous(breaks=pretty(dataBEUZmass$day, n=20))+
+  theme(axis.text.x  = element_text(vjust=0.5, size=16),axis.text.y  = element_text(vjust=0.5, size=16))+
+  scale_x_continuous(breaks = seq(0, 40, by=5), limits=c(0,40))+
   scale_color_manual(values=c("1"="pink","2"="black"))+
   ggtitle("Change in CO2 Production Be")+
   ylab("Mass")+xlab("Day")
 
-
-ggplot(data=dataBEUZ16,aes(x=day,y=co2_min_mass,fill=treat,color=treat))+
+ggplot(data=dataUZvUZ,aes(x=day,y=co2_min_mass,group=treat,color=treat))+
   stat_summary(fun.y=mean, geom="line",shape=25,size=1)+
   stat_summary(fun.y=mean, geom="point",shape=19,size=2)+
   stat_summary(fun.data=mean_se, geom="errorbar", width=0.05,size=1,shape=21) +
-  theme(panel.grid.major = element_line(size=0.5),panel.grid.minor = element_line(size=0))+
-  scale_fill_manual(values=c("1"="lightblue","2"="black"))+
-  scale_x_continuous(breaks=pretty(dataBEUZmass12$day, n=30))+
-  ggtitle("Change in Mass Production")+
+  theme(axis.text.x  = element_text(vjust=0.5, size=16),axis.text.y  = element_text(vjust=0.5, size=16))+
+  scale_x_continuous(breaks = seq(0, 40, by=5), limits=c(0,40))+
+  scale_color_manual(values=c("1"="lightblue","2"="black"))+
+  ggtitle("Change in CO2 Production UZ")+
   ylab("Mass")+xlab("Day")
+
+
+ggplot(data=dataBEUZ16,aes(x=day,y=co2_min_mass,color=strain))+
+  stat_summary(fun.y=mean, geom="line",shape=25,size=1)+
+  stat_summary(fun.y=mean, geom="point",shape=19,size=2)+
+  stat_summary(fun.data=mean_se, geom="errorbar", width=0.05,size=1,shape=21) +
+  theme(axis.text.x = element_text(vjust=0.5, size=16),
+        axis.text.y  = element_text(vjust=0.5, size=16))+
+  scale_x_continuous(breaks = seq(0, 10, by=2), limits=c(0,10))+
+  scale_fill_manual(values=c("1"="lightblue","2"="black"))+
+  ggtitle("Change in Mass Production")+
+  ylab("co2")+xlab("Day")
 
   
 
@@ -357,8 +368,35 @@ ggplot(data=dataBEUZ12,aes(x=day,y=co2_min_mass,color=strain))+
   stat_summary(fun.y=mean, geom="line",shape=25,size=1)+
   stat_summary(fun.y=mean, geom="point",shape=19,size=2)+
   stat_summary(fun.data=mean_se, geom="errorbar", width=0.05,size=1,shape=21) +
-  theme(panel.grid.major = element_line(size=0.5),panel.grid.minor = element_line(size=0))+
-  scale_x_continuous(breaks=pretty(dataBEUZmass$day, n=20))+
+  stat_summary(fun.data=mean_se, geom="errorbar", width=0.05,size=1,shape=21) +
+  theme(axis.text.x = element_text(vjust=0.5, size=16),
+        axis.text.y  = element_text(vjust=0.5, size=16))+
+  scale_x_continuous(breaks = seq(0, 40, by=5), limits=c(0,40))+
+  ggtitle("Change in CO2 Production Be")+
+  ylab("co2")+xlab("Day")
+
+
+ggplot(data=dataBEUZ16,aes(x=day,y=mass,color=strain))+
+  stat_summary(fun.y=mean, geom="line",shape=25,size=1)+
+  stat_summary(fun.y=mean, geom="point",shape=19,size=2)+
+  stat_summary(fun.data=mean_se, geom="errorbar", width=0.05,size=1,shape=21) +
+  theme(axis.text.x = element_text(vjust=0.5, size=16),
+        axis.text.y  = element_text(vjust=0.5, size=16))+
+  scale_x_continuous(breaks = seq(0, 10, by=2), limits=c(0,10))+
+  scale_fill_manual(values=c("1"="lightblue","2"="black"))+
+  ggtitle("Change in Mass Production")+
+  ylab("Mass")+xlab("Day")
+
+  
+
+ggplot(data=dataBEUZ12,aes(x=day,y=mass,color=strain))+
+  stat_summary(fun.y=mean, geom="line",shape=25,size=1)+
+  stat_summary(fun.y=mean, geom="point",shape=19,size=2)+
+  stat_summary(fun.data=mean_se, geom="errorbar", width=0.05,size=1,shape=21) +
+  stat_summary(fun.data=mean_se, geom="errorbar", width=0.05,size=1,shape=21) +
+  theme(axis.text.x = element_text(vjust=0.5, size=16),
+        axis.text.y  = element_text(vjust=0.5, size=16))+
+  scale_x_continuous(breaks = seq(0, 40, by=5), limits=c(0,40))+
   ggtitle("Change in CO2 Production Be")+
   ylab("Mass")+xlab("Day")
 
@@ -600,21 +638,19 @@ ggplot(data=massdiff,aes(x=day,y=co2_min_mass,group=term,color=term))+
   stat_summary(fun.y=mean, geom="line",shape=25,size=1)+
   stat_summary(fun.y=mean, geom="point",shape=19,size=2)+
   stat_summary(fun.data=mean_se, geom="errorbar",width=0.65,size=1,shape=21) +
-    scale_color_manual(values=c("Shallow Diapause" ="green", "Deep Diapause"="black"))+
-  scale_x_continuous(breaks=pretty(massdiff$day, n=14))+
-  theme(panel.grid.major = element_line(size = 0.5),panel.grid.minor = element_line(size=0))+
+  scale_color_manual(values=c("Shallow Diapause" ="green", "Deep Diapause"="black"))+
+  theme(axis.text.x  = element_text(vjust=0.5, size=16),axis.text.y  = element_text(vjust=0.5, size=16))+
+  scale_x_continuous(breaks = seq(0, 40, by=5), limits=c(0,40))+
   labs(y=expression(CO[2]*'/ Production' (mu*L/g/min)),x="Days in 5th Instar")
   
-
 
 ggplot(data=massdiff,aes(x=day,y=mass,group=term,color=term))+
   stat_summary(fun.y=mean, geom="line",shape=25,size=1)+
   stat_summary(fun.y=mean, geom="point",shape=19,size=2)+
   stat_summary(fun.data=mean_se, geom="errorbar",width=0.65,size=1,shape=21) +
   scale_color_manual(values=c("Shallow Diapause" ="blue", "Deep Diapause"="orange"))+
-  scale_x_continuous(breaks=pretty(massdiff$day, n=14))+
-  theme(panel.grid.major = element_line(size = 0.5),panel.grid.minor = element_line(size=0))
-  
+  theme(axis.text.x  = element_text(vjust=0.5, size=16),axis.text.y  = element_text(vjust=0.5, size=16))+
+  scale_x_continuous(breaks = seq(0, 40, by=5), limits=c(0,40))
 
 ggplot(data=massdiff,aes(x=day,y=co2_min_mass,group=term,color=term))+
   stat_summary(fun.y=mean, geom="line",shape=18)+
