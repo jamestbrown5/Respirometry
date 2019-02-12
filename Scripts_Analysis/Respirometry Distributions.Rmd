@@ -420,10 +420,6 @@ treatmasspeaks=rbind(datamassbe,datamassuz)
 modtreatmasspeaks=lm(mass~strain,treatmasspeaks)
 summary(modtreatmasspeaks)
 
-treatmasspeaks12and16=rbind(treatmasspeaks16,treatmasspeaks)
-bothmasspeaks=lm(mass~treat,treatmasspeaks12and16)
-summary(bothmasspeaks)
-
 ggplot(treatmasspeaks12and16,aes(x=treat,y=mass,fill=strain))+
   geom_boxplot()+
   theme_classic()+
@@ -432,6 +428,21 @@ ggplot(treatmasspeaks12and16,aes(x=treat,y=mass,fill=strain))+
   ylab("Mass (g)")+
   xlab("Strains")
 
+ggplot(treatmasspeaks12and16,aes(x=treat,y=co2_min_mass,fill=treat))+
+  geom_boxplot()+
+  theme_classic()+
+  scale_fill_manual(values=c(UZ="purple",BE="orange"))+
+  ggtitle("CO2 production between treatmnets")+
+  ylab("CO2 production")+
+  xlab("Treatment")
+
+treatmasspeaks12and16=rbind(treatmasspeaks16,treatmasspeaks)
+bothmasspeaks=lm(mass~treat,treatmasspeaks12and16)
+summary(bothmasspeaks)
+
+
+bothmasspeaks=lm(co2_min_mass~treat,treatmasspeaks12and16)
+summary(bothmasspeaks)
 
 uzcomp=rbind(datamassuz,datamass16uz)
 uzpeak=lm(co2_min_mass~treat,uzcomp)
