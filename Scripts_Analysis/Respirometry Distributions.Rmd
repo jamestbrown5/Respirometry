@@ -402,18 +402,18 @@ ggplot(data=dataBEUZ12,aes(x=day,y=mass,color=strain))+
 
 
 datamass16be=subset(dataBEUZmass16,strain=="BE")
-datamass16be=subset(datamass16be,day=="3")
+datamass16be=subset(datamass16be,day=="6")
 datamass16uz=subset(dataBEUZmass16,strain=="UZ")
-datamass16uz=subset(datamass16uz,day=="5")
+datamass16uz=subset(datamass16uz,day=="6")
 treatmasspeaks16=rbind(datamass16be,datamass16uz)
 #View(treatmasspeaks16)
 modtreatmasspeaks16=lm(mass~strain,treatmasspeaks16)
 summary(modtreatmasspeaks16)
 
 datamassbe=subset(dataBEUZmass12,strain=="BE")
-datamassbe=subset(datamassbe,day=="6")
+datamassbe=subset(datamassbe,day=="10")
 datamassuz=subset(dataBEUZmass12,strain=="UZ")
-datamassuz=subset(datamassuz,day=="9")
+datamassuz=subset(datamassuz,day=="10")
 treatmasspeaks=rbind(datamassbe,datamassuz)
 #View(treatmasspeaks)
 modtreatmasspeaks=lm(mass~strain,treatmasspeaks)
