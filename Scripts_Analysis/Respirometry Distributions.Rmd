@@ -26,11 +26,11 @@ library(plyr)
 
 #############--------------Read in the data-----------------######################
 #PC
-#setwd("/Users/jbrown/Documents/GitHub/Respirometry/Data")
-#data=read_excel("Respir.xlsx")
+setwd("/Users/jbrown/Documents/GitHub/Respirometry/Data")
+data=read_excel("Respir.xlsx")
 
 #data=read_excel("/Users/JamesB/Google Drive/Graduate School/Self_JamesTBrown/GitHub/Rearing/Data/respir_pupa data.xlsx", sheet = "Sheet1")
-#str(data)
+str(data)
 #data$treat<-as.factor(data$treatment)
 #ggplot(data,aes(x=day,color=strain,fill=strain))+
 #  geom_histogram()+
@@ -42,7 +42,7 @@ library(plyr)
 #  ggtitle("Stages")
 
 #MAC
-data=read_excel("/Users/JamesB/Google Drive/Graduate School/Self_JamesTBrown/GitHub/Respirometry/Data/Respir.xlsx", sheet = "Sheet1")
+#data=read_excel("/Users/JamesB/Google Drive/Graduate School/Self_JamesTBrown/GitHub/Respirometry/Data/Respir.xlsx", sheet = "Sheet1")
 
 ############## Data Prep ###################
 data=subset(data, VCO2!="NA") # Remove NAs from df
@@ -318,7 +318,7 @@ ggplot(treatmpeaks12and16,aes(x=treat,y=co2_hourly_mass,fill=strain))+
 ## Treatment comparison of chainges in Mass BE rep 2 and UZ rep 1 with analysis
 ```{r}
 #Larva Mass: Change over time
-dataBEUZmass=subset(data, stage=="L")
+dataBEUZmass=subset(data, stage=="L"|stage=="P")
 dataBEUZmass=subset(dataBEUZmass,Tray!="12,23 1201-01")
 dataBEUZmass=subset(dataBEUZmass,Tray!="12,23 1201-02")
 dataBEUZmass=subset(dataBEUZmass,Tray!="16,23 1202")
@@ -328,6 +328,7 @@ dataBEUZmass16=subset(dataBEUZmass, treat=="2")
 dataUZvUZ=subset(dataBEUZmass, strain=="UZ")
 dataBEvBE=subset(dataBEUZmass, strain=="BE")
 
+View(dataBEvBE)
 
 dataBEUZmass=subset(dataBEUZmass,treat=="1"|treat=="2")
 ggplot(data=dataBEvBE,aes(x=day,y=co2_min_mass,group=treat,color=treat))+
@@ -587,40 +588,40 @@ ggplot(data=dataBEUZcm,aes(x=day,y=co2_min_mass, color=treat,group=treat))+
 
 
 
-diaBE=subset(dataBEUZ,day=="6")
-ndiaBE=subset(dataBE,day=="4")
-dataBE=rbind(diaBE,ndiaBE)
-dataBE=subset(dataBEUZcm,strain=="BE")
+#diaBE=subset(dataBEUZ,day=="6")
+#ndiaBE=subset(dataBE,day=="4")
+#dataBE=rbind(diaBE,ndiaBE)
+#dataBE=subset(dataBEUZcm,strain=="BE")
 #dataBE=subset(dataBe,day<=10)
-modco2BE=lmer(co2_min_mass~treat + (1|day),data=dataBE)
-summary(modco2BE)
+#modco2BE=lmer(co2_min_mass~treat + (1|day),data=dataBE)
+#summary(modco2BE)
 
-diaUZ=subset(dataBEUZcm,day=="9")
-ndiaUZ=subset(dataBE,day=="5")
-dataUZ=rbind(diaUZ,ndiaUZ)
-dataUZ=subset(dataBEUZcm,strain=="UZ")
+#diaUZ=subset(dataBEUZcm,day=="9")
+#ndiaUZ=subset(dataBE,day=="5")
+#dataUZ=rbind(diaUZ,ndiaUZ)
+#dataUZ=subset(dataBEUZcm,strain=="UZ")
 #dataUZ=subset(dataUZ,day<=10)
-modco2UZ=lmer(co2_min_mass~treat + (1|day),data=dataUZ)
-summary(modco2UZ)
+#modco2UZ=lmer(co2_min_mass~treat + (1|day),data=dataUZ)
+#summary(modco2UZ)
 
 
-ggplot(data=dataNDia,aes(x=day,y=mass,group=strain,color=strain))+
-  stat_summary(fun.y=mean, geom="line",shape=18)+
-  stat_summary(fun.data=mean_se, geom="errorbar", width=0.05) +
-  scale_fill_manual(values=c(UZ="purple",BE="orange"))+
-  theme_bw()+
-  ggtitle("BE and UZ Non Diapause")+
-  ylab("Mass")+xlab("Day")
-modco2mnd=lmer(co2_hourly_mass~strain + (1|day),data=dataNDia)
-summary(modco2mnd)
+#ggplot(data=dataNDia,aes(x=day,y=mass,group=strain,color=strain))+
+  #stat_summary(fun.y=mean, geom="line",shape=18)+
+  #stat_summary(fun.data=mean_se, geom="errorbar", width=0.05) +
+  #scale_fill_manual(values=c(UZ="purple",BE="orange"))+
+  #theme_bw()+
+  #ggtitle("BE and UZ Non Diapause")+
+  #ylab("Mass")+xlab("Day")
+#modco2mnd=lmer(co2_hourly_mass~strain + (1|day),data=dataNDia)
+#summary(modco2mnd)
 
 
-ggplot(data=dataNDia,aes(x=day,y=co2_min_mass,group=strain,color=strain))+
-  stat_summary(fun.y=mean, geom="line",shape=18)+
-  stat_summary(fun.data=mean_se, geom="errorbar", width=0.05) +
-  theme_bw()+
-  ggtitle("BE and UZ Non Diapause")+
-  ylab("CO2 x Min x Mass")+xlab("Day")
+#ggplot(data=dataNDia,aes(x=day,y=co2_min_mass,group=strain,color=strain))+
+ # stat_summary(fun.y=mean, geom="line",shape=18)+
+  #stat_summary(fun.data=mean_se, geom="errorbar", width=0.05) +
+  #theme_bw()+
+  #ggtitle("BE and UZ Non Diapause")+
+  #ylab("CO2 x Min x Mass")+xlab("Day")
 
 
 
@@ -639,11 +640,32 @@ dataBEres=subset(dataBEres,strain=="BE")
 dataBEres=subset(dataBEres,syringe=="51"|syringe=="56"|syringe=="62"|syringe=="64"|syringe=="68"|syringe=="69"|syringe=="75")
 dataBEres$term="Deep Diapause"
 
+summary(dataBEpupa)
+summary(dataBEres)
+View(dataBEres)
+
+mod12=lm(mass~day,dataBEpupa)
+
+plot(mod12)
+summary(mod12)
+
+
+
 massdiff=rbind(dataBEpupa,dataBEres)
 #massdiff=rbind(dataUZUZUZ,massdiff)
 massdiff=subset(massdiff,co2_min_mass!="NA")
 massdiff=subset(massdiff,day!="41")
 massdiff=subset(massdiff,day!="43")
+
+massdiff=subset(massdiff,day=="6")
+modco2peakshallow=lm(mass~term,data=massdiff)
+summary(massdiff)
+summary(modco2peakshallow)
+
+
+modaov12=aov(massdiff$mass~massdiff$term)
+summary(modaov12)
+
 
 ggplot(data=massdiff,aes(x=day,y=co2_min_mass,group=term,color=term))+
   stat_summary(fun.y=mean, geom="line",shape=25,size=1)+
@@ -670,9 +692,7 @@ ggplot(data=massdiff,aes(x=day,y=co2_min_mass,group=term,color=term))+
   ggtitle("Shallow vs Deep Diapause")+
   ylab("CO2 x Min x Mass")+xlab("Day")
 
-massdiff=subset(massdiff,day=="6")
-modco2peakm=lm(co2_min_mass~term,data=massdiff)
-summary(modco2peakm)
+
 
 
 dataBEearly=subset(dataBEpupa,day=="6")
