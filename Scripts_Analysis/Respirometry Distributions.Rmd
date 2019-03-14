@@ -26,8 +26,8 @@ library(plyr)
 
 #############--------------Read in the data-----------------######################
 #PC
-setwd("/Users/jbrown/Documents/GitHub/Respirometry/Data")
-data=read_excel("Respir.xlsx")
+#setwd("/Users/jbrown/Documents/GitHub/Respirometry/Data")
+#data=read_excel("Respir.xlsx")
 
 #data=read_excel("/Users/JamesB/Google Drive/Graduate School/Self_JamesTBrown/GitHub/Rearing/Data/respir_pupa data.xlsx", sheet = "Sheet1")
 str(data)
@@ -42,7 +42,7 @@ str(data)
 #  ggtitle("Stages")
 
 #MAC
-#data=read_excel("/Users/JamesB/Google Drive/Graduate School/Self_JamesTBrown/GitHub/Respirometry/Data/Respir.xlsx", sheet = "Sheet1")
+data=read_excel("/Users/JamesB/Google Drive/Graduate School/Self_JamesTBrown/GitHub/Respirometry/Data/Respir.xlsx", sheet = "Sheet1")
 
 ############## Data Prep ###################
 data=subset(data, VCO2!="NA") # Remove NAs from df
@@ -628,7 +628,7 @@ ggplot(data=dataBEUZcm,aes(x=day,y=co2_min_mass, color=treat,group=treat))+
 
 dataUZUZUZ=subset(data,strain=="UZ")
 dataUZUZUZ=subset(dataUZUZUZ,treat=="1")
-dataUZUZUZ$term="UZ"
+dataUZUZUZ$term="Deep Diapause"
 
 dataBEpupa=subset(data,Tray=="12,23 0208")
 dataBEpupa=subset(dataBEpupa,strain=="BE")
@@ -656,8 +656,9 @@ massdiff=rbind(dataBEpupa,dataBEres)
 massdiff=subset(massdiff,co2_min_mass!="NA")
 massdiff=subset(massdiff,day!="41")
 massdiff=subset(massdiff,day!="43")
+View(massdiff)
 
-massdiff=subset(massdiff,day=="6")
+massdiff=subset(massdiff,day=="11")
 modco2peakshallow=lm(mass~term,data=massdiff)
 summary(massdiff)
 summary(modco2peakshallow)
