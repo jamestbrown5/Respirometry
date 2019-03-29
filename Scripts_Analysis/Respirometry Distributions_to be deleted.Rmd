@@ -30,7 +30,7 @@ setwd("/Users/jbrown/Documents/GitHub/Respirometry/Data")
 data=read_excel("Respir.xlsx")
 
 #data=read_excel("/Users/JamesB/Google Drive/Graduate School/Self_JamesTBrown/GitHub/Rearing/Data/respir_pupa data.xlsx", sheet = "Sheet1")
-str(data)
+#str(data)
 #data$treat<-as.factor(data$treatment)
 #ggplot(data,aes(x=day,color=strain,fill=strain))+
 #  geom_histogram()+
@@ -318,8 +318,7 @@ ggplot(treatmpeaks12and16,aes(x=treat,y=co2_hourly_mass,fill=strain))+
 ## Treatment comparison of chainges in Mass BE rep 2 and UZ rep 1 with analysis
 ```{r}
 #Larva Mass: Change over time
-dataBEUZmass=subset(data, stage=="L")
-dataBEUZmass=subset(dataBEUZmass, stage!="P")
+dataBEUZmass=subset(data, stage=="L"|stage!="P")
 dataBEUZmass=subset(dataBEUZmass,Tray!="12,23 1201-01")
 dataBEUZmass=subset(dataBEUZmass,Tray!="12,23 1201-02")
 dataBEUZmass=subset(dataBEUZmass,Tray!="16,23 1202")
@@ -408,52 +407,44 @@ datamass16uz=subset(dataBEUZmass16,strain=="UZ")
 datamass12uz=subset(dataBEUZmass12,strain=="UZ")
 datamass12be=subset(dataBEUZmass12,strain=="BE")
 
-
-datamass16uz=subset(dataBEUZmass16,strain=="UZ")
-#datamass16uz=subset(datamass16uz,day=="6")
-treatmasspeaks16=rbind(datamass16be,datamass16uz)
-#View(treatmasspeaks16)
-modtreatmasspeaks16=lm(mass~strain,treatmasspeaks16)
-summary(modtreatmasspeaks16)
-
-BE16UZ16wetmass=lm(mass~strain+day, data=dataBEUZ16)
-summary(BE16UZ16wetmass)
-
+#Effect of Strain on CO2 in diapause conditions on the day wet mass peaked
 datamassbe=subset(dataBEUZmass12,strain=="BE")
-#datamassbe=subset(datamassbe,day=="10")
+datamassbe=subset(datamassbe,day=="7")
 datamassuz=subset(dataBEUZmass12,strain=="UZ")
-#datamassuz=subset(datamassuz,day=="10")
-treatmasspeaks=rbind(datamassbe,datamassuz)
+datamassuz=subset(datamassuz,day=="8")
+dmasspeaks=rbind(datamassbe,datamassuz)
 #View(treatmasspeaks)
-modtreatmasspeaks=lm(mass~strain,treatmasspeaks)
-summary(modtreatmasspeaks)
+dmasspeaks=lm(co2_hourly_mass~strain,dmasspeaks)
+summary(dmasspeaks)
 
-dataBEUZ=subset(dataBEUZ,treat!="3")
-dataBEUZ=subset(dataBEUZ,treat!="4")
-wetmasspeakBEUZ=aggregate(max ~ day*strain+treat+syringe, data = dataBEUZ, FUN = max)
-View(wetmasspeakBEUZ)
-datamassmax=lm(mass~day,wetmasspeakBEUZ)
-summary(datamassmax)
+#Effect of Strain on CO2 in non-diapause conditions on the day wet mass peaked
+datamassbe=subset(dataBEUZmass16,strain=="BE")
+datamassbe=subset(datamassbe,day=="3")
+datamassuz=subset(dataBEUZmass16,strain=="UZ")
+datamassuz=subset(datamassuz,day=="5")
+ndmasspeaks=rbind(datamassbe,datamassuz)
+#View(treatmasspeaks)
+ndmasspeaks=lm(co2_hourly_mass~strain,ndmasspeaks)
+summary(ndmasspeaks)
+
+#BE Effect of Photoperiod on CO2 in BE on the day wet mass peaked
+datamassbe16=subset(datamass16be,day=="3")
+datamassbe12=subset(datamass12be,day=="7")
+bemasspeaks=rbind(datamassbe12,datamassbe16)
+#View(treatmasspeaks)
+bemod=lm(co2_hourly_mass~treat,bemasspeaks)
+summary(bemod)
 
 
+#uz Effect of Photoperiod on CO2 in UZ on the day wet mass peaked
+datamassuz16=subset(datamass16uz,day=="5")
+datamassuz12=subset(datamass12uz,day=="8")
+uzmasspeaks=rbind(datamassuz12,datamassuz16)
+#View(treatmasspeaks)
+uzmod=lm(co2_hourly_mass~treat,uzmasspeaks)
+summary(uzmod)
 
-dfBE16=lm(mass~day,dfBE16)
-summary(dfBE16)
-wetmasspeakUZ16=aggregate(mass ~ syringe, data = datamass16uz, FUN = max ) 
-dfUZ16=merge(wetmasspeakUZ16,datamass16uz)
-summary(dfUZ16)
-dfUZ16=lm(mass~day,dfUZ16)
-summary(dfUZ16)
-wetmasspeakBE12=aggregate(mass ~ syringe, data = datamass12be, FUN = max ) 
-dfBE12=merge(wetmasspeakBE12,datamass12be)
-summary(dfBE12)
-dfBE12=lm(mass~day,dfBE12)
-summary(dfBE12)
-wetmasspeakUZ12=aggregate(mass ~ syringe, data = datamass12uz, FUN = max ) 
-dfUZ12=merge(wetmasspeakUZ12,datamass12uz)
-summary(dfUZ12)
-dfUZ12=lm(mass~day,dfUZ12)
-summary(dfUZ12)
+
 
 ggplot(treatmasspeaks12and16,aes(x=treat,y=mass,fill=strain))+
   geom_boxplot()+
@@ -496,6 +487,144 @@ summary(peak12)
 
 peak16=lm(co2_min_mass~strain,treatmasspeaks16)
 summary(peak16)
+```
+#Mass Peak Density data
+```{r}
+#Larva Mass: Change over time
+dataBEUZmass=subset(data, stage=="L")
+dataBEUZmass=subset(dataBEUZmass, stage!="P")
+dataBEUZmass=subset(dataBEUZmass,Tray!="12,23 1201-01")
+dataBEUZmass=subset(dataBEUZmass,Tray!="12,23 1201-02")
+dataBEUZmass=subset(dataBEUZmass,Tray!="16,23 1202")
+dataBEUZmass=subset(dataBEUZmass,Tray!="16,23 1201")
+dataBEUZmass12=subset(dataBEUZmass, treat=="1")
+dataBEUZmass16=subset(dataBEUZmass, treat=="2")
+dataUZvUZ=subset(dataBEUZmass, strain=="UZ")
+dataBEvBE=subset(dataBEUZmass, strain=="BE")
+
+
+peak12=lmer(mass~day+strain+(1|Tray),dataBEUZ12)
+summary(peak12)
+
+peak16=lmer(mass~day*strain+(1|Tray),dataBEUZ16)
+summary(peak16)
+
+ggplot(data=dataBEUZ16,aes(x=max,color=strain,group=strain))+
+  geom_density(alpha=0.25, adjust=2)+
+  theme(axis.text.x  = element_text(vjust=01, size=16),axis.text.y  = element_text(vjust=0.5, size=16))+
+  scale_x_discrete(breaks = seq(0, 12, by=1), limits=c(0,12))+
+  scale_fill_manual(values=c("BE"="blue","UZ"="red"))+
+  ggtitle("Days to Peak Wet Mass")
+
+ggplot(data=dataBEUZ16,aes(x=day,y=mass,color=strain))+
+  stat_summary(fun.y=mean, geom="line",shape=25,size=1)+
+  stat_summary(fun.y=mean, geom="point",shape=19,size=2)+
+  stat_summary(fun.data=mean_se, geom="errorbar", width=0.05,size=1,shape=21) +
+  theme(axis.text.x = element_text(vjust=0.5, size=16),
+        axis.text.y  = element_text(vjust=0.5, size=16))+
+  scale_x_continuous(breaks = seq(0, 10, by=2), limits=c(0,10))+
+  scale_fill_manual(values=c("1"="lightblue","2"="black"))+
+  ggtitle("Change in Mass Production")+
+  ylab("Mass")+xlab("Day")
+
+
+ggplot(dataBEUZ12, aes(x=day, y=mass,color=strain,group=strain))+
+  geom_density(alpha=.2,adjust=2)+
+  facet_wrap(~treat)+
+  theme(axis.text.x  = element_text(vjust=0.5, size=16),axis.text.y  = element_text(vjust=0.5, size=16))+
+  scale_x_continuous(breaks = seq(0, 17, by=5), limits=c(0,17))+
+  scale_fill_manual(values=c("BE"="blue","UZ"="red"))+
+  ggtitle("Days to Wandering Stage")
+
+wetmasspeakBE16UZ16=aggregate(mass ~ strain+day, data = datamass16be, FUN = range ) 
+dfBE16=merge(wetmasspeakBE16,datamass16be)
+summary(dfBE16)
+dfBE16=lm(mass~day,dfBE16)
+summary(dfBE16)
+wetmasspeakUZ16=aggregate(mass ~ syringe, data = datamass16uz, FUN = max ) 
+dfUZ16=merge(wetmasspeakUZ16,datamass16uz)
+summary(dfUZ16)
+dfUZ16=lm(mass~day,dfUZ16)
+summary(dfUZ16)
+wetmasspeakBE12=aggregate(mass ~ syringe, data = datamass12be, FUN = max ) 
+dfBE12=merge(wetmasspeakBE12,datamass12be)
+summary(dfBE12)
+dfBE12=lm(mass~day,dfBE12)
+summary(dfBE12)
+wetmasspeakUZ12=aggregate(mass ~ syringe, data = datamass12uz, FUN = max ) 
+dfUZ12=merge(wetmasspeakUZ12,datamass12uz)
+summary(dfUZ12)
+dfUZ12=lm(mass~day,dfUZ12)
+summary(dfUZ12)
+summary(dataBEUZ12)
+modtreat=lmer(mass~day*strain+(1|Tray),data=dataBEUZ12,REML = TRUE)
+summary(modtreat)
+#step(modtreat)
+plot(modtreat)
+summary(modtreat)
+
+all12=subset(all,treat==12)
+summary(all12)
+ggplot(dataBEUZmass12, aes(x=max,fill=strain))+
+  geom_density(alpha=.3,adjust=2.5)+
+  xlab("Peak MAss")+
+  theme_classic()+
+  scale_x_continuous(breaks = seq(0, 12, by=1), limits=c(0,15))+
+  scale_fill_manual(values=c(UZ="purple",BE="orange"))+
+  ggtitle("Non Diapause Conditions")
+
+mod12=lm(max~day,dataBEUZmass16)
+plot(mod12)
+summary(mod12)
+modaov12=aov(dataBEUZmass16$max~dataBEUZmass16$day)
+summary(modaov12)
+
+
+all16=subset(dataBEUZmass,treat==2)
+allbe16=subset(all16,strain=="BE")
+alluz16=subset(all16,strain=="UZ")
+summary(all16)
+summary(allbe16)
+summary(alluz16)
+all12=subset(dataBEUZmass,treat==1)
+allbe12=subset(all12,strain=="BE")
+alluz12=subset(all12,strain=="UZ")
+summary(all12)
+summary(allbe12)
+summary(alluz12)
+
+modbe16=lm(max~day,allbe16)
+summary(allbe16)
+summary(modbe16)
+
+moduz16=lm(max~day,alluz16)
+summary(alluz16)
+summary(moduz16)
+
+modbe12=lm(max~day,allbe12)
+summary(allbe12)
+summary(modbe12)
+
+moduz12=lm(max~day,alluz12)
+summary(alluz12)
+summary(moduz12)
+
+  ggplot(dataBEUZmass16, aes(x=day,y=max))+
+  stat_summary(aes(y = max), fun.y=mean, geom="point", position="dodge",size=4)+
+  stat_summary(fun.y=median, fun.ymin=function(x) median(x) - sd(x), 
+               fun.ymax=function(x) median(x) + sd(x), geom="errorbar",position="dodge", width=0.1) +
+  facet_wrap(~treat)+
+  xlab("Day of Peak Mass")+
+  theme_classic()+
+  ggtitle("Non Diapause Conditions")
+
+mod16=lmer(wday~strain+(1|cohort),all16)
+summary(all16)
+summary(mod16)
+
+mod12=lmer(wday~strain+(1|cohort),all12)
+summary(all12)
+summary(mod12)
 ```
 
 
@@ -695,9 +824,9 @@ massdiff=rbind(dataBEpupa,dataBEres)
 massdiff=subset(massdiff,co2_min_mass!="NA")
 massdiff=subset(massdiff,day!="41")
 massdiff=subset(massdiff,day!="43")
-View(massdiff)
+#View(massdiff)
 
-massdiff=subset(massdiff,day=="11")
+massdiff=subset(massdiff,day=="6")
 modco2peakshallow=lm(mass~term,data=massdiff)
 summary(massdiff)
 summary(modco2peakshallow)
