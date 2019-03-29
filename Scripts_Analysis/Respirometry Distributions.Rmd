@@ -318,7 +318,7 @@ ggplot(treatmpeaks12and16,aes(x=treat,y=co2_hourly_mass,fill=strain))+
 ## Treatment comparison of chainges in Mass BE rep 2 and UZ rep 1 with analysis
 ```{r}
 #Larva Mass: Change over time
-dataBEUZmass=subset(data, stage=="L"|stage=="P")
+dataBEUZmass=subset(data, stage=="L"|stage!="P")
 dataBEUZmass=subset(dataBEUZmass,Tray!="12,23 1201-01")
 dataBEUZmass=subset(dataBEUZmass,Tray!="12,23 1201-02")
 dataBEUZmass=subset(dataBEUZmass,Tray!="16,23 1202")
@@ -328,7 +328,7 @@ dataBEUZmass16=subset(dataBEUZmass, treat=="2")
 dataUZvUZ=subset(dataBEUZmass, strain=="UZ")
 dataBEvBE=subset(dataBEUZmass, strain=="BE")
 
-View(dataBEvBE)
+#View(dataBEvBE)
 
 dataBEUZmass=subset(dataBEUZmass,treat=="1"|treat=="2")
 ggplot(data=dataBEvBE,aes(x=day,y=co2_min_mass,group=treat,color=treat))+
@@ -403,22 +403,50 @@ ggplot(data=dataBEUZ12,aes(x=day,y=mass,color=strain))+
 
 
 datamass16be=subset(dataBEUZmass16,strain=="BE")
-datamass16be=subset(datamass16be,day=="6")
 datamass16uz=subset(dataBEUZmass16,strain=="UZ")
-datamass16uz=subset(datamass16uz,day=="6")
+datamass12uz=subset(dataBEUZmass12,strain=="UZ")
+datamass12be=subset(dataBEUZmass12,strain=="BE")
+
+
+datamass16uz=subset(dataBEUZmass16,strain=="UZ")
+#datamass16uz=subset(datamass16uz,day=="6")
 treatmasspeaks16=rbind(datamass16be,datamass16uz)
 #View(treatmasspeaks16)
 modtreatmasspeaks16=lm(mass~strain,treatmasspeaks16)
 summary(modtreatmasspeaks16)
 
+BE16UZ16wetmass=lm(mass~strain+day, data=dataBEUZ16)
+summary(BE16UZ16wetmass)
+
 datamassbe=subset(dataBEUZmass12,strain=="BE")
-datamassbe=subset(datamassbe,day=="10")
+#datamassbe=subset(datamassbe,day=="10")
 datamassuz=subset(dataBEUZmass12,strain=="UZ")
-datamassuz=subset(datamassuz,day=="10")
+#datamassuz=subset(datamassuz,day=="10")
 treatmasspeaks=rbind(datamassbe,datamassuz)
 #View(treatmasspeaks)
 modtreatmasspeaks=lm(mass~strain,treatmasspeaks)
 summary(modtreatmasspeaks)
+
+wetmasspeakBE16UZ16=aggregate(mass ~ strain+day, data = datamass16be, FUN = range ) 
+dfBE16=merge(wetmasspeakBE16,datamass16be)
+summary(dfBE16)
+dfBE16=lm(mass~day,dfBE16)
+summary(dfBE16)
+wetmasspeakUZ16=aggregate(mass ~ syringe, data = datamass16uz, FUN = max ) 
+dfUZ16=merge(wetmasspeakUZ16,datamass16uz)
+summary(dfUZ16)
+dfUZ16=lm(mass~day,dfUZ16)
+summary(dfUZ16)
+wetmasspeakBE12=aggregate(mass ~ syringe, data = datamass12be, FUN = max ) 
+dfBE12=merge(wetmasspeakBE12,datamass12be)
+summary(dfBE12)
+dfBE12=lm(mass~day,dfBE12)
+summary(dfBE12)
+wetmasspeakUZ12=aggregate(mass ~ syringe, data = datamass12uz, FUN = max ) 
+dfUZ12=merge(wetmasspeakUZ12,datamass12uz)
+summary(dfUZ12)
+dfUZ12=lm(mass~day,dfUZ12)
+summary(dfUZ12)
 
 ggplot(treatmasspeaks12and16,aes(x=treat,y=mass,fill=strain))+
   geom_boxplot()+
@@ -431,12 +459,16 @@ ggplot(treatmasspeaks12and16,aes(x=treat,y=mass,fill=strain))+
 ggplot(treatmasspeaks12and16,aes(x=treat,y=co2_min_mass,fill=treat))+
   geom_boxplot()+
   theme_classic()+
+  facet_wrap(~day)+
   scale_fill_manual(values=c(UZ="purple",BE="orange"))+
   ggtitle("CO2 production between treatmnets")+
   ylab("CO2 production")+
   xlab("Treatment")
 
+
 treatmasspeaks12and16=rbind(treatmasspeaks16,treatmasspeaks)
+BE16peaks=lm(mass~datamass16be$day,datamass16be)
+summary(BE16peaks)
 bothmasspeaks=lm(mass~treat,treatmasspeaks12and16)
 summary(bothmasspeaks)
 
@@ -457,9 +489,9 @@ summary(peak12)
 
 peak16=lm(co2_min_mass~strain,treatmasspeaks16)
 summary(peak16)
-
-
 ```
+
+
 
 ```{r}
 dataUZ12=subset(dataBEUZ12,strain=="UZ")
